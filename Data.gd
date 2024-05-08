@@ -27,19 +27,42 @@ func get_file_path() -> String:
 	var path:String = path_selection.get_item_text(selected_path)
 	return 'user://Paths/' + track + '/' + path
 
-func save_path(file_path:String = get_file_path()) -> void:
+func save_path(file_path: String=get_file_path()) -> void:
 	if not file_path.ends_with('.bx'):
 		file_path += '.bx'
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
-	file.store_line(JSON.stringify(bx.marker_data))
+	file.store_line(custom_json_stringify(bx.marker_data))
 	#for line in bx.path:
 		#file.store_float(line)
 	file.close()
 
+# Custom JSON stringification function
+func custom_json_stringify(data: Dictionary) -> String:
+	var result = "{\n"
+	for key in data.keys():
+		# Collect array values into a list of strings
+		var string_values = []
+		for value in data[key]:
+			string_values.append(str(value))
+		
+		# Format array values into a single line with tab at the start and tabs in between values
+		var formatted_value = "\t[" + ", ".join(string_values) + "]"
+		
+		# Append formatted key-value pairs
+		result += "\t\"%s\": %s,\n" % [key, formatted_value]
+	
+	# Remove the last comma and newline, then close the JSON object
+	result = result.rstrip(",\n") + "\n}"
+	
+	return result
+
 func load_path(file_path:String) -> void:
 	var file:FileAccess
 	file = FileAccess.open(file_path + '.bx', FileAccess.READ)
-	var marker_data:Dictionary = JSON.parse_string(file.get_line())
+	var json = JSON.new()
+	json.parse(file.get_as_text())
+	var marker_data:Dictionary = json.data
+	print(marker_data)
 	var keys = marker_data.keys()
 	for i in keys:
 		marker_data[int(i)] = marker_data[i]

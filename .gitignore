@@ -1,2 +1,4 @@
 # Godot 4+ specific ignores
 .godot/
+Tracks/Lambada.mp3
+Tracks/Lambada.mp3.import
