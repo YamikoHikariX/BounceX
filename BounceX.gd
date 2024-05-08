@@ -156,6 +156,10 @@ func _on_gui_input(event):
 				$MarkersMenu/HBox/Frame/Input.value += 1
 			else:
 				frame_scrub(-MOUSE_WHEEL_ACCELERATOR if shift_pressed else -1)
+		# if right click, deselect marker
+		elif event is InputEventMouseButton and event.button_mask & MOUSE_BUTTON_RIGHT:
+			if $Markers.selected_marker:
+				$Markers.selected_marker.get_node('Button').button_pressed = false
 		elif event is InputEventMouseMotion:
 			if event.button_mask & MOUSE_BUTTON_LEFT:
 				frame_scrub(event.relative.x / DRAG_RESISTANCE)
@@ -206,6 +210,41 @@ func _input(event):
 	for trans_number in 11:
 		if event.is_action_pressed('t' + str(trans_number)):
 			trans_input(trans_number)
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_Z:
+			# Find a previous marker
+			var marker_list = marker_data.keys()
+			if frame not in marker_list:
+				marker_list.append(frame)
+			marker_list.sort()
+			var index = marker_list.find(frame)
+			if index > 0:
+				var previous_marker = marker_list[index-1]
+				frame = previous_marker
+				place_ball(marker_data[previous_marker][0])
+				# Deselect the current marker
+				if $Markers.selected_marker:
+					$Markers.selected_marker.get_node('Button').button_pressed = false
+				# Select the previous marker
+				$Markers.marker_list[previous_marker].get_node('Button').button_pressed = true
+				update_display()
+		elif event.keycode == KEY_C:
+			# Find a next marker
+			var marker_list = marker_data.keys()
+			if frame not in marker_list:
+				marker_list.append(frame)
+			marker_list.sort()
+			var index = marker_list.find(frame)
+			if index < marker_list.size() - 1:
+				var next_marker = marker_list[index+1]
+				frame = next_marker
+				place_ball(marker_data[next_marker][0])
+				# Deselect the current marker
+				if $Markers.selected_marker:
+					$Markers.selected_marker.get_node('Button').button_pressed = false
+				# Select the next marker
+				$Markers.marker_list[next_marker].get_node('Button').button_pressed = true
+				update_display()
 
 func position_input(input:int):
 	if %Record.button_pressed:

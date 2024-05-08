@@ -39,7 +39,9 @@ func save_path(file_path: String=get_file_path()) -> void:
 # Custom JSON stringification function
 func custom_json_stringify(data: Dictionary) -> String:
 	var result = "{\n"
-	for key in data.keys():
+	var keys = data.keys()
+	keys.sort()
+	for key in keys:
 		# Collect array values into a list of strings
 		var string_values = []
 		for value in data[key]:
