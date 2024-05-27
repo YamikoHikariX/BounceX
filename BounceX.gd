@@ -24,6 +24,14 @@ var marker_data:Dictionary
 var frame:int
 var step:int
 
+const MOUSE_WHEEL_ACCELERATOR:int = 5
+const DRAG_RESISTANCE:float = 4
+
+var shift_pressed:bool
+var control_pressed:bool
+
+var input_disabled:bool
+
 var metronome_high_enabled:bool = true
 var metronome_low_enabled:bool = true
 
@@ -167,14 +175,6 @@ func frame_scrub(frame_movement:float) -> void:
 	var minutes = str(int(playback_pos) / 60).lpad(2, "0")
 	slider.get_node('TrackTime').text = minutes + ":" + seconds
 	slider.set_value(playback_pos / track_length)
-
-const MOUSE_WHEEL_ACCELERATOR:int = 5
-const DRAG_RESISTANCE:float = 4
-
-var shift_pressed:bool
-var control_pressed:bool
-
-var input_disabled:bool
 
 func _on_gui_input(event):
 	if input_disabled: return
@@ -740,3 +740,17 @@ func update_display() -> void:
 		place_ball(path[frame+1])
 	else:
 		place_ball(0)
+
+
+func _on_button_2_pressed():
+	for point in path:
+		place_ball(point)
+		$Path.add_point($Ball.position)
+		$Ball.position.x += 1 * path_speed
+		await get_tree().create_timer(0.1).timeout
+		#$Ball.position.x
+	#$Path.add_point(Vector2($Ball.position.x + step, $Ball.position.y))
+
+func _on_h_slider_value_changed(value):
+	$Path.position.x -= value
+	pass # Replace with function body.
