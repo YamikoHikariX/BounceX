@@ -211,7 +211,7 @@ func _input(event):
 		if event.is_action_pressed('t' + str(trans_number)):
 			trans_input(trans_number)
 	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_Z:
+		if event.is_action('move_left'):
 			# Find a previous marker
 			var marker_list = marker_data.keys()
 			if frame not in marker_list:
@@ -228,7 +228,7 @@ func _input(event):
 				# Select the previous marker
 				$Markers.marker_list[previous_marker].get_node('Button').button_pressed = true
 				update_display()
-		elif event.keycode == KEY_C:
+		elif event.is_action('move_right'):
 			# Find a next marker
 			var marker_list = marker_data.keys()
 			if frame not in marker_list:
