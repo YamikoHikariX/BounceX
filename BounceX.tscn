@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://ddntuwjds6r37"]
+[gd_scene load_steps=40 format=3 uid="uid://ddntuwjds6r37"]
 
 [ext_resource type="Theme" uid="uid://4ddly4r83yek" path="res://Theme.tres" id="1_qtjw4"]
 [ext_resource type="Script" path="res://BounceX.gd" id="2_4ci4k"]
@@ -19,6 +19,8 @@
 [ext_resource type="Texture2D" uid="uid://bmlus4dohtrmw" path="res://Textures/Gear.svg" id="8_o0vj8"]
 [ext_resource type="Texture2D" uid="uid://bgcpkp1078rc6" path="res://Textures/AddMarker.svg" id="11_5ucy7"]
 [ext_resource type="Texture2D" uid="uid://bius3v0napj7c" path="res://Textures/Ball.svg" id="12_freos"]
+[ext_resource type="AudioStream" uid="uid://cv1t12exki0m8" path="res://high.mp3" id="13_f5b8j"]
+[ext_resource type="AudioStream" uid="uid://ei20c56vlwua" path="res://low.mp3" id="14_oleqp"]
 [ext_resource type="Texture2D" uid="uid://cvdu2l73nu3mw" path="res://Textures/Key Map.svg" id="16_2degy"]
 [ext_resource type="Texture2D" uid="uid://4gt7poc6r8ta" path="res://Textures/Right Click.png" id="17_cvd54"]
 
@@ -1029,6 +1031,14 @@ layout_mode = 2
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Menu/Controls"]
 unique_name_in_owner = true
+
+[node name="MetronomeHigh" type="AudioStreamPlayer" parent="Menu/Controls"]
+unique_name_in_owner = true
+stream = ExtResource("13_f5b8j")
+
+[node name="MetronomeLow" type="AudioStreamPlayer" parent="Menu/Controls"]
+unique_name_in_owner = true
+stream = ExtResource("14_oleqp")
 
 [node name="TrackSelection" type="OptionButton" parent="Menu/Controls"]
 layout_mode = 2

@@ -24,6 +24,9 @@ var marker_data:Dictionary
 var frame:int
 var step:int
 
+var metronome_high_enabled:bool = true
+var metronome_low_enabled:bool = true
+
 func _init():
 	Data.bx = self
 
@@ -38,9 +41,22 @@ func _ready():
 func _physics_process(delta):
 	if %Play.button_pressed:
 		if not %AudioStreamPlayer.stream_paused:
-			if frame+1 < path.size() - 1:
-				if sign(path[frame+1]) > -1:
-					place_ball(path[frame+1])
+			var next_frame = frame + 1
+			if next_frame < path.size() - 1:
+				if sign(path[next_frame]) > -1:
+					if marker_data.has(next_frame) and (metronome_high_enabled or metronome_low_enabled):
+						var curr_marker = marker_data[next_frame]
+						var prev_marker = get_previous_marker(next_frame)
+
+						var prev_marker_depth = prev_marker[0]
+						var curr_marker_depth = curr_marker[0]
+
+						if metronome_high_enabled and prev_marker_depth < curr_marker_depth:
+							%MetronomeHigh.play()
+						elif metronome_low_enabled and prev_marker_depth >= curr_marker_depth:
+							%MetronomeLow.play()
+							
+					place_ball(path[next_frame])
 					toggle_ball_visible(true)
 				elif $Menu/Controls/Paths.is_anything_selected():
 					if not %Record.button_pressed:
@@ -89,6 +105,14 @@ func define_path(set_ball_pos := true):
 		var ball_pos = clamp(($Ball.position.y - BOTTOM) / (TOP - BOTTOM), 0, 1)
 		set_ball_depth(ball_pos)
 
+func get_previous_marker(frame:int) -> Array:
+	var marker_list = marker_data.keys()
+	marker_list.sort()
+	var index = marker_list.find(frame)
+	if index > 0:
+		return marker_data[marker_list[index-1]]
+	return [0, 0, 0, 0]
+
 func get_ease_direction(depth) -> int:
 	var ease:int
 	if depth >= get_ball_depth():
@@ -114,6 +138,13 @@ func set_ball_depth(depth:float) -> void:
 	if %Record.button_pressed and $Header/MenuButton.button_pressed:
 		$Header/MenuButton.button_pressed = false
 	place_ball(depth)
+	if metronome_high_enabled or metronome_low_enabled:
+		var prev_marker = get_previous_marker(frame)
+		var prev_marker_depth = prev_marker[0]
+		if metronome_high_enabled and prev_marker_depth < depth:
+			%MetronomeHigh.play()
+		elif metronome_low_enabled and prev_marker_depth > depth:
+			%MetronomeLow.play()
 
 func place_ball(depth:float) -> void:
 	$Ball.position.y = BOTTOM + depth * (TOP - BOTTOM)
@@ -276,6 +307,13 @@ func _input(event):
 
 		# Reload the marker data
 		Data.load_path(file_path)
+
+
+	elif event.is_action_pressed('toggle_metronome_high'):
+		metronome_high_enabled = !metronome_high_enabled
+
+	elif event.is_action_pressed('toggle_metronome_low'):
+		metronome_low_enabled = !metronome_low_enabled
 
 	for position_number in 11:
 		if event.is_action_pressed('p' + str(position_number)):
