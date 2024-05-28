@@ -237,10 +237,14 @@ func _input(event):
 	elif event.is_action_pressed('copy_nodes'):
 		if $Markers.selected_multi_markers.size() > 0:
 			var copied_markers:Dictionary = {}
-			# Combine selected_multi_markers and selected_marker to loop through them together
-			var selected_markers = []
+			
+			var selected_markers:Array = []
 			selected_markers.append($Markers.selected_marker)
 			selected_markers += $Markers.selected_multi_markers
+
+			var sort_by_frame = func(a, b):
+				return a.get_meta('frame') < b.get_meta('frame')
+			selected_markers.sort_custom(sort_by_frame)
 
 			var i = 0
 			for marker in selected_markers:
@@ -257,6 +261,8 @@ func _input(event):
 					distance = frame_distance
 
 				copied_markers[frame] = [depth, trans, ease, distance]
+				print("Copied marker at frame: ", frame, " with depth: ", depth, " with distance ", distance)
+				print()
 				i += 1
 
 			DisplayServer.clipboard_set(json_utils.custom_json_stringify(copied_markers))
