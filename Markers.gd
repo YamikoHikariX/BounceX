@@ -240,8 +240,8 @@ func get_next_marker_frame(frame:int, look_forward:=1) -> int:
 func connect_marker(frame:int, connect_next:=true) -> void:
 	if frame == 0 or not marker_list.has(frame):
 		return
-	var previous_frame = get_previous_frame(frame)
-	var next_frame = get_next_frame(frame)
+	var previous_frame = get_previous_marker_frame(frame)
+	var next_frame = get_next_marker_frame(frame)
 	var marker:Node = marker_list[frame]
 	var previous:Node = marker_list[previous_frame]
 	var starting_position = previous.position
