@@ -1,5 +1,7 @@
 extends Control
 
+var json_utils = preload("res://JsonUtils.gd").new()
+
 var TOP:float
 var BOTTOM:float
 
