@@ -34,7 +34,7 @@ func set_markers():
 			marker_data[frame][3])
 		connect_marker(frame)
 
-func add_marker(frame, depth, trans=null, ease=null, auxiliary=null):
+func add_marker(frame:int, depth, trans=null, ease=null, auxiliary=null):
 	var marker:Sprite2D = $Marker.duplicate()
 	marker.show()
 	for node in marker_list.values():
@@ -216,16 +216,6 @@ func get_marker_index(frame:int) -> int:
 	var keys = marker_list.keys()
 	keys.sort()
 	return keys.find(frame)
-
-# func get_previous_marker(frame:int) -> Node:
-# 	var keys = marker_list.keys()
-# 	keys.sort()
-# 	var index = keys.find(frame)
-# 	if index == 0:
-# 		return null
-# 	print(marker_list)
-# 	return marker_list[keys[index - 1]]
-
 
 func get_previous_marker_frame(frame:int, look_back:=1) -> int:
 	var keys = marker_list.keys()

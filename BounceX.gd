@@ -235,7 +235,6 @@ func _input(event):
 	elif event.is_action_released('control'):
 		control_pressed = false
 	elif event.is_action_pressed('copy_nodes'):
-		print('copying nodes')
 		if $Markers.selected_multi_markers.size() > 0:
 			var copied_markers:Dictionary = {}
 			# Combine selected_multi_markers and selected_marker to loop through them together
@@ -260,21 +259,23 @@ func _input(event):
 				copied_markers[frame] = [depth, trans, ease, distance]
 				i += 1
 
-			print(copied_markers)
 			DisplayServer.clipboard_set(json_utils.custom_json_stringify(copied_markers))
 
 	elif event.is_action_pressed('paste_nodes'):
-		print('pasting nodes')
+		input_disabled = true
 		var json = JSON.new()
-		json.parse(DisplayServer.clipboard_get())
+		var error = json.parse(DisplayServer.clipboard_get())
+		if error != OK:
+			print("Failed to parse clipboard data")
+			input_disabled = false
+			return
 		var pasted_marker_data:Dictionary = json.data
 		var pasted_marker_keys = pasted_marker_data.keys()
 		
-		var starting_frame = frame
-		var accumulating_distance = 0
+		var starting_frame:int = frame
+		var accumulating_distance:int = 0
 		var new_marker_data:Dictionary = {}
 
-		# Rewrite each pasted marker with the accumulated distance being the key
 		for pasted_marker_key in pasted_marker_keys:
 			var pasted_marker = pasted_marker_data[pasted_marker_key]
 			var depth = pasted_marker[0]
@@ -283,31 +284,14 @@ func _input(event):
 			var distance = pasted_marker[3]
 			accumulating_distance += distance
 
-			var new_frame = frame + accumulating_distance
+			var new_frame:int = starting_frame + accumulating_distance
 
-			new_marker_data[new_frame] = [depth, trans, ease]
-
-		# Add the new_marker_data to the json file
-		var file_path = Data.get_file_path()
-
-		var file:FileAccess
-		file = FileAccess.open(file_path + '.bx', FileAccess.READ)
-		json.parse(file.get_as_text())
-		var marker_data:Dictionary = json.data
-		var keys = marker_data.keys()
-
-		# Add the new markers to the existing marker data
-		for new_marker_key in new_marker_data.keys():
-			marker_data[new_marker_key] = new_marker_data[new_marker_key]
+			marker_data[new_frame] = [depth, trans, ease, 0]
+			%Markers.add_marker(new_frame, depth, trans, ease)
+			%Markers.connect_marker(new_frame)
 		
-		# Write the new marker data to the json file
-		file = FileAccess.open(file_path + '.bx', FileAccess.WRITE)
-		file.store_string(json_utils.custom_json_stringify(marker_data))
-		file.close()
-
-		# Reload the marker data
-		Data.load_path(file_path)
-
+		Data.save_path()
+		input_disabled = false
 
 	elif event.is_action_pressed('toggle_metronome_high'):
 		metronome_high_enabled = !metronome_high_enabled

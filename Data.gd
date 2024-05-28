@@ -44,7 +44,6 @@ func load_path(file_path:String) -> void:
 	var json = JSON.new()
 	json.parse(file.get_as_text())
 	var marker_data:Dictionary = json.data
-	print(marker_data)
 	var keys = marker_data.keys()
 	for i in keys:
 		marker_data[int(i)] = marker_data[i]
