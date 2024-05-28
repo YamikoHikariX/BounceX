@@ -183,15 +183,15 @@ func set_marker_movement_range():
 	for set in sequences:
 		var min_frame
 		var max_frame
-		var previous_frame = get_previous_frame(set.front())
+		var previous_frame = get_previous_marker_frame(set.front())
 		if previous_frame == set.front():
 			movement_min = 0
 			movement_max = 0
 		else:
 			min_frame = previous_frame + MARKER_SEPARATION_MIN
-			var next_frame = get_next_frame(set.back())
+			var next_frame = get_next_marker_frame(set.back())
 			if next_frame != set.back():
-				max_frame = get_next_frame(set.back()) - MARKER_SEPARATION_MIN
+				max_frame = get_next_marker_frame(set.back()) - MARKER_SEPARATION_MIN
 			else:
 				max_frame = owner.path.size() - 1
 			var movement_left = set.front() - min_frame
@@ -216,20 +216,30 @@ func get_marker_index(frame:int) -> int:
 	keys.sort()
 	return keys.find(frame)
 
-func get_previous_frame(frame:int, look_back:=1) -> int:
+# func get_previous_marker(frame:int) -> Node:
+# 	var keys = marker_list.keys()
+# 	keys.sort()
+# 	var index = keys.find(frame)
+# 	if index == 0:
+# 		return null
+# 	print(marker_list)
+# 	return marker_list[keys[index - 1]]
+
+
+func get_previous_marker_frame(frame:int, look_back:=1) -> int:
 	var keys = marker_list.keys()
 	keys.sort()
 	return keys[max(keys.find(frame) - look_back, 0)]
 
-func get_next_frame(frame:int, look_forward:=1) -> int:
+func get_next_marker_frame(frame:int, look_forward:=1) -> int:
 	var keys = marker_list.keys()
 	keys.sort()
 	return keys[min(keys.find(frame) + look_forward, marker_list.size() - 1)]
 
 func connect_marker(frame:int, connect_next:=true) -> void:
 	if frame == 0 or not marker_list.has(frame): return
-	var previous_frame = get_previous_frame(frame)
-	var next_frame = get_next_frame(frame)
+	var previous_frame = get_previous_marker_frame(frame)
+	var next_frame = get_next_marker_frame(frame)
 	var marker:Node = marker_list[frame]
 	var previous:Node = marker_list[previous_frame]
 	var starting_position = previous.position
@@ -265,8 +275,8 @@ func connect_all_markers():
 		connect_marker(marker)
 
 func clear_ahead(frame:int):
-	var start_frame = get_previous_frame(frame)
-	var end_frame = get_next_frame(frame)
+	var start_frame = get_previous_marker_frame(frame)
+	var end_frame = get_next_marker_frame(frame)
 	if end_frame == 0:
 		end_frame = owner.path.size()
 	for i in range(start_frame, end_frame):
@@ -333,7 +343,7 @@ func _on_depth_value_changed(value):
 		marker.set_meta('depth', new_pos)
 		owner.marker_data[marker_frame][0] = new_pos
 		if marker_frame == 0:
-			connect_marker(get_next_frame(0))
+			connect_marker(get_next_marker_frame(0))
 		connect_marker(marker_frame)
 		place_ball_on_path()
 		Data.save_path()
@@ -417,7 +427,7 @@ func _on_delete_pressed():
 		var frame:int = selected_marker.get_meta('frame')
 		if frame == 0:
 			return
-		var next_frame = get_next_frame(frame)
+		var next_frame = get_next_marker_frame(frame)
 		clear_ahead(frame)
 		marker_list.erase(frame)
 		owner.marker_data.erase(frame)
@@ -439,8 +449,8 @@ func _on_delete_pressed():
 				del_markers.append(marker)
 		for marker in del_markers:
 			var frame:int = marker.get_meta('frame')
-			var previous_frame = get_previous_frame(frame)
-			var next_frame = get_next_frame(frame)
+			var previous_frame = get_previous_marker_frame(frame)
+			var next_frame = get_next_marker_frame(frame)
 			marker_list.erase(frame)
 			owner.marker_data.erase(frame)
 			for point in range(previous_frame, next_frame + 1):
