@@ -201,6 +201,80 @@ func _input(event):
 		control_pressed = true
 	elif event.is_action_released('control'):
 		control_pressed = false
+	elif event.is_action_pressed('copy_nodes'):
+		print('copying nodes')
+		if $Markers.selected_multi_markers.size() > 0:
+			var copied_markers:Dictionary = {}
+			# Combine selected_multi_markers and selected_marker to loop through them together
+			var selected_markers = []
+			selected_markers.append($Markers.selected_marker)
+			selected_markers += $Markers.selected_multi_markers
+
+			var i = 0
+			for marker in selected_markers:
+				var frame = marker.get_meta('frame')
+				var depth = marker.get_meta('depth')
+				var trans = marker.get_meta('trans')
+				var ease = marker.get_meta('ease')
+				var distance = 0
+
+				# If it's not the first marker, calculate the frame distance between the current and previous marker
+				if i > 0:
+					var previous_frame = selected_markers[i - 1].get_meta('frame')
+					var frame_distance = frame - previous_frame
+					distance = frame_distance
+
+				copied_markers[frame] = [depth, trans, ease, distance]
+				i += 1
+
+			print(copied_markers)
+			DisplayServer.clipboard_set(json_utils.custom_json_stringify(copied_markers))
+
+	elif event.is_action_pressed('paste_nodes'):
+		print('pasting nodes')
+		var json = JSON.new()
+		json.parse(DisplayServer.clipboard_get())
+		var pasted_marker_data:Dictionary = json.data
+		var pasted_marker_keys = pasted_marker_data.keys()
+		
+		var starting_frame = frame
+		var accumulating_distance = 0
+		var new_marker_data:Dictionary = {}
+
+		# Rewrite each pasted marker with the accumulated distance being the key
+		for pasted_marker_key in pasted_marker_keys:
+			var pasted_marker = pasted_marker_data[pasted_marker_key]
+			var depth = pasted_marker[0]
+			var trans = pasted_marker[1]
+			var ease = pasted_marker[2]
+			var distance = pasted_marker[3]
+			accumulating_distance += distance
+
+			var new_frame = frame + accumulating_distance
+
+			new_marker_data[new_frame] = [depth, trans, ease]
+
+		# Add the new_marker_data to the json file
+		var file_path = Data.get_file_path()
+
+		var file:FileAccess
+		file = FileAccess.open(file_path + '.bx', FileAccess.READ)
+		json.parse(file.get_as_text())
+		var marker_data:Dictionary = json.data
+		var keys = marker_data.keys()
+
+		# Add the new markers to the existing marker data
+		for new_marker_key in new_marker_data.keys():
+			marker_data[new_marker_key] = new_marker_data[new_marker_key]
+		
+		# Write the new marker data to the json file
+		file = FileAccess.open(file_path + '.bx', FileAccess.WRITE)
+		file.store_string(json_utils.custom_json_stringify(marker_data))
+		file.close()
+
+		# Reload the marker data
+		Data.load_path(file_path)
+
 	for position_number in 11:
 		if event.is_action_pressed('p' + str(position_number)):
 			position_input(int(str(position_number).lstrip('p')))
