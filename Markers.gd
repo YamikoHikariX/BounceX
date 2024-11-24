@@ -1,7 +1,9 @@
 extends Control
 
+var marker_scene: PackedScene = preload("res://Scenes/Marker/marker.tscn")
+
 var marker_list:Dictionary
-var selected_marker:Sprite2D
+var selected_marker: Marker
 var selected_multi_markers:Array
 
 var clipboard:Dictionary
@@ -19,8 +21,23 @@ func _ready():
 		input.focus_entered.connect(input_focus_entered)
 		input.focus_exited.connect(input_focus_exited)
 
+var are_gaps_shown:bool:
+	set(value):
+		if value:
+			show_gaps()
+		else:
+			hide_gaps()
+
+var gap_label_scene: PackedScene = preload('res://gap_label.tscn')
+		
 
 func _input(event):
+	if event.is_action_pressed('center_marker'):
+		center_selected_marker()
+	if event.is_action_pressed('show_gaps'):
+		are_gaps_shown = true
+	elif event.is_action_released('show_gaps'):
+		are_gaps_shown = false
 	if event.is_action_pressed('copy'):
 		_on_copy_pressed()
 	if event.is_action_pressed('paste'):
@@ -39,6 +56,48 @@ func _input(event):
 			for node in i:
 				node.release_focus()
 
+		
+
+func center_selected_marker():
+	if not selected_marker:
+		return
+	var next_marker = get_next_marker(selected_marker.get_meta('frame'))
+	var previous_marker = get_previous_marker(selected_marker.get_meta('frame'))
+	var distance = get_distance(previous_marker, next_marker)
+	var middle: int = previous_marker.get_meta('frame') + distance / 2
+	frame_input.value = middle
+
+func show_gaps():
+	# var markers: Array[Marker] = get_visible_markers()
+	var markers = marker_list.values()
+	
+	for i in range(markers.size() - 1):
+		var gap_label: Node = gap_label_scene.instantiate()
+		var gap = get_distance(markers[i], markers[i+1])
+		# gap_label.position = visible_markers[i].position
+		gap_label.position = (markers[i].position + markers[i+1].position) / 2
+		gap_label.position.y = 380		
+		gap_label.text = str(gap)
+		%GapLabels.add_child(gap_label)
+
+		print(markers[i].position, gap_label.position, markers[i+1].position)
+	%GapLabels.show()
+
+func get_visible_markers() -> Array[Marker]:
+	var visible_rect = get_viewport().get_visible_rect()
+	var markers: Array[Marker] = []
+	for marker in marker_list.values():
+		if marker.global_position.x > 0 and marker.global_position.x < visible_rect.size.x:
+			markers.append(marker)
+	return markers
+		
+
+func hide_gaps():
+	for node in %GapLabels.get_children():
+		node.queue_free()
+
+func get_distance(marker_a, marker_b):
+	return abs(marker_a.get_meta('frame') - marker_b.get_meta('frame'))
 
 func set_markers():
 	for node in marker_list.values():
@@ -56,7 +115,7 @@ func set_markers():
 
 
 func add_marker(frame, depth, trans=null, ease=null, auxiliary=0):
-	var marker:Sprite2D = $Marker.duplicate()
+	var marker: Marker = marker_scene.instantiate()
 	marker.show()
 	for node in marker_list.values():
 		if node.get_meta('frame') == frame:
@@ -70,7 +129,7 @@ func add_marker(frame, depth, trans=null, ease=null, auxiliary=0):
 		if int(auxiliary) & 1 << 0:
 			marker.self_modulate = Color.HOT_PINK
 	marker_list[frame] = marker
-	var marker_button = marker.get_node('Button')
+	var marker_button = marker.get_node('%Button')
 	marker_button.toggled.connect(marker_toggled.bind(marker))
 	marker_button.gui_input.connect(_on_marker_gui_input.bind(marker))
 	var render_pos = owner.BOTTOM + depth * (owner.TOP - owner.BOTTOM)
@@ -108,13 +167,13 @@ func marker_toggled(button_pressed:bool, marker:Node):
 	if mouse_movement != Vector2(0,0):
 		mouse_movement = Vector2(0,0)
 		if marker == selected_marker:
-			marker.get_node('Button').set_pressed_no_signal(true)
+			marker.get_node('%Button').set_pressed_no_signal(true)
 		else:
-			marker.get_node('Button').set_pressed_no_signal(false)
+			marker.get_node('%Button').set_pressed_no_signal(false)
 		return
 	if not owner.control_pressed and not selecting_to_edge:
 		for node in selected_multi_markers:
-			node.get_node('Button/Selected').hide()
+			node.get_node('%Button/Selected').hide()
 		selected_multi_markers.clear()
 	if button_pressed:
 		if owner.shift_pressed and selected_marker or selecting_to_edge:
@@ -132,29 +191,29 @@ func marker_toggled(button_pressed:bool, marker:Node):
 				if marker_list[keys[index]] != selected_marker:
 					selected_multi_markers.append(marker_list[keys[index]])
 			for node in selected_multi_markers:
-				node.get_node('Button/Selected').self_modulate = Color.PURPLE
-				node.get_node('Button/Selected').show()
-				node.get_node('Button').set_pressed_no_signal(false)
+				node.get_node('%Button/Selected').self_modulate = Color.PURPLE
+				node.get_node('%Button/Selected').show()
+				node.get_node('%Button').set_pressed_no_signal(false)
 			set_marker_movement_range()
 			return
 		elif owner.control_pressed and selected_marker:
 			if not selected_multi_markers.has(marker):
 				selected_multi_markers.append(marker)
-				marker.get_node('Button/Selected').self_modulate = Color.PURPLE
-				marker.get_node('Button/Selected').show()
-				marker.get_node('Button').set_pressed_no_signal(false)
+				marker.get_node('%Button/Selected').self_modulate = Color.PURPLE
+				marker.get_node('%Button/Selected').show()
+				marker.get_node('%Button').set_pressed_no_signal(false)
 			else:
 				selected_multi_markers.erase(marker)
-				marker.get_node('Button/Selected').hide()
-				marker.get_node('Button').set_pressed_no_signal(false)
+				marker.get_node('%Button/Selected').hide()
+				marker.get_node('%Button').set_pressed_no_signal(false)
 			set_marker_movement_range()
 			return
 		for node in marker_list.values():
 			if node != marker:
-				node.get_node('Button').set_pressed_no_signal(false)
-				node.get_node('Button/Selected').hide()
-		marker.get_node('Button/Selected').self_modulate = Color.AQUAMARINE
-		marker.get_node('Button/Selected').show()
+				node.get_node('%Button').set_pressed_no_signal(false)
+				node.get_node('%Button/Selected').hide()
+		marker.get_node('%Button/Selected').self_modulate = Color.AQUAMARINE
+		marker.get_node('%Button/Selected').show()
 		var frame = marker.get_meta('frame')
 		var aux_list = %MarkersMenu/HBox/AuxiliaryFunctions.get_popup()
 		for i in aux_list.item_count:
@@ -181,7 +240,7 @@ func marker_toggled(button_pressed:bool, marker:Node):
 		depth_input.value = owner.get_ball_depth()
 		frame_input.value_changed.connect(_on_frame_value_changed)
 		depth_input.value_changed.connect(_on_depth_value_changed)
-		marker.get_node('Button/Selected').hide()
+		marker.get_node('%Button/Selected').hide()
 		set_marker_menu_mode(MARKER_MENU.NOTHING_SELECTED)
 		selected_marker = null
 
@@ -211,15 +270,15 @@ func set_marker_movement_range():
 	for set in sequences:
 		var min_frame
 		var max_frame
-		var previous_frame = get_previous_frame(set.front())
+		var previous_frame = get_previous_marker_frame(set.front())
 		if previous_frame == set.front():
 			movement_min = 0
 			movement_max = 0
 		else:
 			min_frame = previous_frame + SEPARATION_MIN
-			var next_frame = get_next_frame(set.back())
+			var next_frame = get_next_marker_frame(set.back())
 			if next_frame != set.back():
-				max_frame = get_next_frame(set.back()) - SEPARATION_MIN
+				max_frame = get_next_marker_frame(set.back()) - SEPARATION_MIN
 			else:
 				max_frame = owner.path.size() - 1
 			var movement_left = set.front() - min_frame
@@ -246,24 +305,39 @@ func get_marker_index(frame:int) -> int:
 	keys.sort()
 	return keys.find(frame)
 
+func get_previous_marker(frame:int) -> Marker:
+	var list = owner.marker_data.keys()
+	list.sort()
+	var index = list.find(frame)
+	if index > 0:
+		return marker_list[list[index-1]]
+	return null
 
-func get_previous_frame(frame:int, look_back:=1) -> int:
+func get_next_marker(frame:int) -> Marker:
+	var list = owner.marker_data.keys()
+	list.sort()
+	var index = list.find(frame)
+	if index < list.size() - 1:
+		return marker_list[list[index+1]]
+	return null
+
+
+func get_previous_marker_frame(frame:int, look_back:=1) -> int:
 	var keys = marker_list.keys()
 	keys.sort()
 	return keys[max(keys.find(frame) - look_back, 0)]
 
 
-func get_next_frame(frame:int, look_forward:=1) -> int:
+func get_next_marker_frame(frame:int, look_forward:=1) -> int:
 	var keys = marker_list.keys()
 	keys.sort()
 	return keys[min(keys.find(frame) + look_forward, marker_list.size() - 1)]
 
-
 func connect_marker(frame:int, connect_next:=true) -> void:
 	if frame == 0 or not marker_list.has(frame):
 		return
-	var previous_frame = get_previous_frame(frame)
-	var next_frame = get_next_frame(frame)
+	var previous_frame = get_previous_marker_frame(frame)
+	var next_frame = get_next_marker_frame(frame)
 	var marker:Node = marker_list[frame]
 	var previous:Node = marker_list[previous_frame]
 	var starting_position = previous.position
@@ -301,8 +375,8 @@ func connect_all_markers():
 
 
 func clear_ahead(frame:int):
-	var start_frame = get_previous_frame(frame)
-	var end_frame = get_next_frame(frame)
+	var start_frame = get_previous_marker_frame(frame)
+	var end_frame = get_next_marker_frame(frame)
 	if end_frame == 0:
 		end_frame = owner.path.size()
 	for i in range(start_frame, end_frame):
@@ -328,10 +402,10 @@ func select_to(index:int):
 	if selected_frame == 0 and index == 1:
 		return
 	var selected_marker_copy = selected_marker
-	selected_marker.get_node('Button').button_pressed = false
+	selected_marker.get_node('%Button').button_pressed = false
 	selected_multi_markers.clear()
 	selected_marker = selected_marker_copy
-	selected_marker.get_node('Button').button_pressed = true
+	selected_marker.get_node('%Button').button_pressed = true
 	var sorted_markers:Array = marker_list.keys()
 	sorted_markers.sort()
 	selecting_to_edge = true
@@ -409,7 +483,7 @@ func _on_depth_value_changed(value):
 		marker.set_meta('depth', new_pos)
 		owner.marker_data[marker_frame][0] = new_pos
 		if marker_frame == 0:
-			connect_marker(get_next_frame(0))
+			connect_marker(get_next_marker_frame(0))
 		connect_marker(marker_frame)
 		place_ball_on_path()
 		Data.save_path()
@@ -493,6 +567,8 @@ func frame_is_zero(marker) -> bool:
 		return true
 	return false
 
+func is_frame_marker(frame:int) -> bool:
+	return marker_list.has(frame)
 
 func _on_add_marker_mouse_entered():
 	%MarkersMenu/HBox/Create/AddMarker.self_modulate = '4fd6d6'
@@ -589,9 +665,9 @@ func _on_paste_pressed():
 			connect_marker(frame)
 	
 	if selected_marker:
-		selected_marker.get_node('Button').button_pressed = false
+		selected_marker.get_node('%Button').button_pressed = false
 		for node in selected_multi_markers:
-			node.get_node('Button/Selected').hide()
+			node.get_node('%Button/Selected').hide()
 		selected_multi_markers.clear()
 	
 	owner.save_path()
@@ -612,7 +688,7 @@ func _on_delete_pressed():
 		var frame:int = selected_marker.get_meta('frame')
 		if frame == 0:
 			return
-		var next_frame = get_next_frame(frame)
+		var next_frame = get_next_marker_frame(frame)
 		clear_ahead(frame)
 		marker_list.erase(frame)
 		owner.marker_data.erase(frame)
@@ -629,13 +705,13 @@ func _on_delete_pressed():
 			if selected_marker.get_meta('frame') != 0:
 				del_markers.append(selected_marker)
 		for marker in selected_multi_markers:
-			marker.get_node('Button/Selected').hide()
+			marker.get_node('%Button/Selected').hide()
 			if marker.get_meta('frame') != 0:
 				del_markers.append(marker)
 		for marker in del_markers:
 			var frame:int = marker.get_meta('frame')
-			var previous_frame = get_previous_frame(frame)
-			var next_frame = get_next_frame(frame)
+			var previous_frame = get_previous_marker_frame(frame)
+			var next_frame = get_next_marker_frame(frame)
 			marker_list.erase(frame)
 			owner.marker_data.erase(frame)
 			for point in range(previous_frame, next_frame + 1):

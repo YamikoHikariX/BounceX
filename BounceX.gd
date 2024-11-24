@@ -21,6 +21,9 @@ var marker_data:Dictionary
 var frame:int
 var step:int
 
+# Used for understanding the depth change between frames
+var last_frame_depth:float = -1
+
 const MOUSE_WHEEL_ACCELERATOR:int = 5
 const DRAG_RESISTANCE:float = 4
 
@@ -45,14 +48,25 @@ func _ready():
 	toggle_ball_visible(false)
 	update_display()
 
-
 func _physics_process(delta):
 	if %Play.button_pressed:
 		if not %AudioStreamPlayer.stream_paused:
 			if frame+1 < path.size() - 1:
+
+				if %MarkerSounds.is_enabled():
+					%MarkerSounds.play_marker_sound(frame, marker_data)
+
 				if sign(path[frame+1]) > -1:
+					var current_depth = path[frame+1]
+					if last_frame_depth != -1 and last_frame_depth != current_depth:
+						var depth_change = current_depth - last_frame_depth
+						if %OSSMSounds.is_enabled:
+							%OSSMSounds.simulate_ossm(current_depth, depth_change)
+
 					place_ball(path[frame+1])
 					toggle_ball_visible(true)
+					last_frame_depth = path[frame+1]
+					
 				elif $Menu/Controls/Paths.is_anything_selected():
 					if not %Record.button_pressed:
 						toggle_ball_visible(false)
@@ -151,6 +165,7 @@ func place_marker(depth:float) -> void:
 
 
 func frame_scrub(frame_movement:float) -> void:
+	last_frame_depth = -1
 	connect_sliders_signal()
 	frame = clamp(frame - frame_movement, 0, path.size() - 10)
 	if sign(path[frame+1]) > -1:
@@ -200,7 +215,7 @@ func _input(event):
 	
 	elif event.is_action_pressed("cancel"):
 		if $Markers.selected_marker:
-			$Markers.selected_marker.get_node('Button').button_pressed = false
+			$Markers.selected_marker.get_node('%Button').button_pressed = false
 			$Markers.selected_multi_markers.clear()
 		elif %Record.button_pressed:
 			%Record.button_pressed = false
@@ -281,7 +296,7 @@ func _on_record_toggled(active:bool):
 		$Header/Record.show()
 		var marker_node = $Markers.selected_marker
 		if marker_node and is_instance_valid(marker_node):
-			marker_node.get_node('Button').button_pressed = false
+			marker_node.get_node('%Button').button_pressed = false
 		toggle_ball_visible(true)
 		if $Markers.marker_list.size() == 1:
 			var depth = $Markers.marker_list[0].get_meta('depth')
@@ -625,3 +640,15 @@ func update_display() -> void:
 		place_ball(path[frame+1])
 	else:
 		place_ball(0)
+
+
+# func get_previous_marker(frame:int) -> Array:
+# 	var marker_list = marker_data.keys()
+# 	marker_list.sort()
+# 	var index = marker_list.find(frame)
+# 	if index > 0:
+# 		return marker_data[marker_list[index-1]]
+# 	return [0, 0, 0, 0]
+
+# func is_frame_marker(frame:int) -> bool:
+# 	return marker_data.has(frame)

@@ -1,0 +1,158 @@
+[gd_scene load_steps=9 format=3 uid="uid://cfp23f60du50n"]
+
+[ext_resource type="Script" path="res://Scenes/AudioCuesPanel/audio_cues_panel.gd" id="1_cciji"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ptxwc"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wapgj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vjeb3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dqxnt"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eyiri"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6wuv2"]
+
+[sub_resource type="Theme" id="Theme_5jxy1"]
+CheckBox/styles/disabled = SubResource("StyleBoxEmpty_ptxwc")
+CheckBox/styles/focus = SubResource("StyleBoxEmpty_wapgj")
+CheckBox/styles/hover = SubResource("StyleBoxEmpty_vjeb3")
+CheckBox/styles/hover_pressed = SubResource("StyleBoxEmpty_dqxnt")
+CheckBox/styles/normal = SubResource("StyleBoxEmpty_eyiri")
+CheckBox/styles/pressed = SubResource("StyleBoxEmpty_6wuv2")
+
+[node name="AudioCuesPanel" type="PanelContainer"]
+offset_right = 186.0
+offset_bottom = 174.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = SubResource("Theme_5jxy1")
+script = ExtResource("1_cciji")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 7
+theme_override_constants/margin_bottom = 7
+
+[node name="AudioCues" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+alignment = 1
+
+[node name="AudioCuesLabel" type="Label" parent="MarginContainer/AudioCues"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Audio Cues
+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AudioCues" type="HBoxContainer" parent="MarginContainer/AudioCues"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="VolumeSliders" type="HBoxContainer" parent="MarginContainer/AudioCues/AudioCues"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="MusicVolumeBox" type="VBoxContainer" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders"]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="MusicVolumeSlider" type="VSlider" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders/MusicVolumeBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+max_value = 2.0
+step = 0.01
+value = 1.0
+
+[node name="MusicVolumeLabel" type="Label" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders/MusicVolumeBox"]
+layout_mode = 2
+text = "Music"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OSSMVolumeBox" type="VBoxContainer" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders"]
+layout_mode = 2
+
+[node name="OSSMVolumeSlider" type="VSlider" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders/OSSMVolumeBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+max_value = 2.0
+step = 0.01
+value = 1.0
+
+[node name="OSSMVolumeLabel" type="Label" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders/OSSMVolumeBox"]
+layout_mode = 2
+text = "OSSM"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MarkerVolumeBox" type="VBoxContainer" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders"]
+layout_mode = 2
+
+[node name="MarkerVolumeSlider" type="VSlider" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders/MarkerVolumeBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+max_value = 2.0
+step = 0.01
+value = 1.0
+
+[node name="MarkerVolumeLabel" type="Label" parent="MarginContainer/AudioCues/AudioCues/VolumeSliders/MarkerVolumeBox"]
+layout_mode = 2
+text = "Marker"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SoundsToggles" type="VBoxContainer" parent="MarginContainer/AudioCues/AudioCues"]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="High" type="CheckBox" parent="MarginContainer/AudioCues/AudioCues/SoundsToggles"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+button_pressed = true
+text = "High"
+
+[node name="Low" type="CheckBox" parent="MarginContainer/AudioCues/AudioCues/SoundsToggles"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+button_pressed = true
+text = "Low
+"
+
+[node name="Flat" type="CheckBox" parent="MarginContainer/AudioCues/AudioCues/SoundsToggles"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+button_pressed = true
+text = "Flat
+"
+
+[node name="OSSM" type="CheckBox" parent="MarginContainer/AudioCues/AudioCues/SoundsToggles"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+button_pressed = true
+text = "OSSM"
