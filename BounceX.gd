@@ -209,6 +209,18 @@ func _on_gui_input(event):
 func _input(event):
 	if input_disabled:
 		return
+
+	if event.is_action_pressed('move_to_prev_marker'):
+		var marker_to_move_to = %Markers.get_previous_marker(frame)
+		if marker_to_move_to:
+			move_to_marker(marker_to_move_to)
+	if event.is_action_pressed('move_to_next_marker'):
+		var marker_to_move_to = %Markers.get_next_marker(frame)
+		if marker_to_move_to:
+			move_to_marker(marker_to_move_to)
+	if event.is_action_pressed("move_to_selected_marker"):
+		if $Markers.selected_marker:
+			move_to_marker($Markers.selected_marker)
 	
 	elif event.is_action_pressed("record") and %AudioStreamPlayer.stream:
 		%Record.button_pressed = !%Record.button_pressed
@@ -259,6 +271,12 @@ func _input(event):
 		if event.is_action_pressed('ease_' + str(easing)):
 			easing_input(easing)
 
+func move_to_marker(marker:Node):
+	frame = marker.get_meta('frame')
+	if $Markers.selected_marker:
+		$Markers.selected_marker.get_node('Button').button_pressed = false
+	marker.get_node('Button').button_pressed = true
+	update_display()
 
 func depth_input(input:int):
 	if %Record.button_pressed:

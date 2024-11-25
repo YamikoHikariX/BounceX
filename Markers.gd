@@ -304,32 +304,53 @@ func get_marker_index(frame:int) -> int:
 	return keys.find(frame)
 
 func get_previous_marker(frame:int) -> Marker:
-	var list = owner.marker_data.keys()
-	list.sort()
-	var index = list.find(frame)
-	if index > 0:
-		return marker_list[list[index-1]]
-	return null
+	var frames = owner.marker_data.keys()
+	frames.sort()
+	var previous_marker = null
+	for marker_frame in frames:
+		if marker_frame < frame:
+			previous_marker = marker_list[marker_frame]
+		else:	
+			break
+	return previous_marker
 
 func get_next_marker(frame:int) -> Marker:
-	var list = owner.marker_data.keys()
-	list.sort()
-	var index = list.find(frame)
-	if index < list.size() - 1:
-		return marker_list[list[index+1]]
+	var frames = owner.marker_data.keys()
+	frames.sort()
+	for marker_frame in frames:
+		if marker_frame > frame:
+			return marker_list[marker_frame]
 	return null
 
-
 func get_previous_marker_frame(frame:int, look_back:=1) -> int:
-	var keys = marker_list.keys()
-	keys.sort()
-	return keys[max(keys.find(frame) - look_back, 0)]
-
+	var frames = owner.marker_data.keys()
+	frames.sort()
+	var previous_frames = []
+	for marker_frame in frames:
+		if marker_frame < frame:
+			previous_frames.append(marker_frame)
+		else:
+			break
+	if previous_frames.size() >= look_back:
+		return previous_frames[previous_frames.size() - look_back]
+	elif previous_frames.size() > 0:
+		return previous_frames.front()
+	else:
+		return frames.front()
 
 func get_next_marker_frame(frame:int, look_forward:=1) -> int:
-	var keys = marker_list.keys()
-	keys.sort()
-	return keys[min(keys.find(frame) + look_forward, marker_list.size() - 1)]
+	var frames = owner.marker_data.keys()
+	frames.sort()
+	var next_frames = []
+	for marker_frame in frames:
+		if marker_frame > frame:
+			next_frames.append(marker_frame)
+	if next_frames.size() >= look_forward:
+		return next_frames[look_forward - 1]
+	elif next_frames.size() > 0:
+		return next_frames.back()
+	else:
+		return frames.back()
 
 func connect_marker(frame:int, connect_next:=true) -> void:
 	if frame == 0 or not marker_list.has(frame):
