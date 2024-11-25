@@ -79,8 +79,6 @@ func show_gaps():
 		gap_label.position.y = 380		
 		gap_label.text = str(gap)
 		%GapLabels.add_child(gap_label)
-
-		print(markers[i].position, gap_label.position, markers[i+1].position)
 	%GapLabels.show()
 
 func get_visible_markers() -> Array[Marker]:
