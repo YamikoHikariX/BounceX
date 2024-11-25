@@ -812,20 +812,21 @@ script/source = "extends Panel
 var positions:Array
 var phase:int
 
+enum NoteDuration {
+	WHOLE = 1,
+	HALF = 2,
+	QUARTER = 3,
+	EIGHTH = 4,
+	SIXTEENTH = 5,
+	THIRTY_SECOND = 6,
+}
+
 func _ready():
 	self_modulate.a = 1.6
 
-
-func _on_bpm_value_changed(value):
-	$Inputs/Interval/FrameInterval/SpinBox.value = 60 / (value / 60)
-
-
-func _on_frame_interval_value_changed(value):
-	$Inputs/Interval/BPM/SpinBox.value = 60 / (value / 60)
-
-
 func _on_generate_pressed():
-	var frame_interval = $Inputs/Interval/FrameInterval/SpinBox.value
+	var bpm = $Inputs/Interval/BPM/SpinBox.value
+	var note_duration: NoteDuration = $Inputs/Interval/NoteDuration/NoteDurationOptions.get_item_id($Inputs/Interval/NoteDuration/NoteDurationOptions.selected)
 	var length = $Inputs/Length/SpinBox.value
 	var height = $Inputs/Positions/Height/SpinBox.value
 	var depth = $Inputs/Positions/Depth/SpinBox.value
@@ -839,14 +840,37 @@ func _on_generate_pressed():
 			positions = [depth, depth]
 	else:
 		positions = [height, depth]
-	create_marker(current_frame, positions[phase])
-	for i in length - 1:
-		current_frame += frame_interval
-		create_marker(current_frame, positions[phase])
+	var beat_frames = get_beat_frames(starting_frame, bpm, length, note_duration)
+	for beat in beat_frames:
+		create_marker(beat, positions[phase])
+
 	hide()
 	owner.input_disabled = false
 	owner.save_path()
 
+func get_beat_frames(starting_frame: int, song_bpm: float, total_beats: int, note_duration: NoteDuration, fps: float = 60.0) -> Array[int]:
+	var beat_interval_divider: float
+	match note_duration:
+		NoteDuration.WHOLE: beat_interval_divider = 0.25
+		NoteDuration.HALF: beat_interval_divider = 0.5
+		NoteDuration.QUARTER: beat_interval_divider = 1
+		NoteDuration.EIGHTH: beat_interval_divider = 2
+		NoteDuration.SIXTEENTH: beat_interval_divider = 4
+		NoteDuration.THIRTY_SECOND: beat_interval_divider = 8
+	
+	var beat_interval_seconds: float = 60.0 / song_bpm / beat_interval_divider
+	var beat_interval_frames: float = beat_interval_seconds * fps
+	var beat_frames: Array[int] = []
+	var current_frame: float = int(round(starting_frame))
+
+	for beat in range(total_beats):
+		var frame_number: int = int(round(current_frame))
+		beat_frames.append(frame_number)
+		current_frame += beat_interval_frames
+
+	print(note_duration)
+	print(beat_frames)
+	return beat_frames
 
 func create_marker(frame:int, depth):
 	phase = abs(phase - 1)
@@ -865,7 +889,6 @@ func create_marker(frame:int, depth):
 	owner.marker_data[frame] = [depth, trans, ease, 0]
 	%Markers.add_marker(frame, depth, trans, ease)
 	%Markers.connect_marker(frame)
-
 
 func _on_cancel_pressed():
 	hide()
@@ -1878,23 +1901,30 @@ max_value = 720.0
 step = 0.01
 value = 120.0
 
-[node name="Label" type="Label" parent="GenerateCycle/Inputs/Interval"]
-layout_mode = 2
-text = "/"
-
-[node name="FrameInterval" type="HBoxContainer" parent="GenerateCycle/Inputs/Interval"]
+[node name="NoteDuration" type="HBoxContainer" parent="GenerateCycle/Inputs/Interval"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="GenerateCycle/Inputs/Interval/FrameInterval"]
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/Interval/NoteDuration"]
 layout_mode = 2
-text = "Frame interval:"
+text = "Notes:"
 vertical_alignment = 1
 
-[node name="SpinBox" type="SpinBox" parent="GenerateCycle/Inputs/Interval/FrameInterval"]
+[node name="NoteDurationOptions" type="OptionButton" parent="GenerateCycle/Inputs/Interval/NoteDuration"]
 layout_mode = 2
-min_value = 5.0
-max_value = 9999.0
-value = 30.0
+selected = 2
+item_count = 6
+popup/item_0/text = "Wholes"
+popup/item_0/id = 1
+popup/item_1/text = "Halfs"
+popup/item_1/id = 2
+popup/item_2/text = "Quarters"
+popup/item_2/id = 3
+popup/item_3/text = "8ths"
+popup/item_3/id = 4
+popup/item_4/text = "16ths"
+popup/item_4/id = 5
+popup/item_5/text = "32nds"
+popup/item_5/id = 5
 
 [node name="Length" type="HBoxContainer" parent="GenerateCycle/Inputs"]
 layout_mode = 2
@@ -2196,7 +2226,6 @@ grow_horizontal = 0
 [connection signal="confirmed" from="RenderRange" to="RenderRange" method="_on_confirmed"]
 [connection signal="custom_action" from="RenderComplete" to="RenderComplete" method="_on_custom_action"]
 [connection signal="value_changed" from="GenerateCycle/Inputs/Interval/BPM/SpinBox" to="GenerateCycle" method="_on_bpm_value_changed"]
-[connection signal="value_changed" from="GenerateCycle/Inputs/Interval/FrameInterval/SpinBox" to="GenerateCycle" method="_on_frame_interval_value_changed"]
 [connection signal="pressed" from="GenerateCycle/Buttons/Generate" to="GenerateCycle" method="_on_generate_pressed"]
 [connection signal="pressed" from="GenerateCycle/Buttons/Cancel" to="GenerateCycle" method="_on_cancel_pressed"]
 [connection signal="pressed" from="InfoPanel/Button" to="InfoPanel/Button" method="_on_pressed"]
