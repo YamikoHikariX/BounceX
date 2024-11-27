@@ -532,6 +532,7 @@ func render(starting_frame: int, ending_frame: int):
 	$Path.show()
 	$Markers.hide()
 	$MarkersMenu.hide()
+	$AudioCuesPanel.hide()
 	
 	for point in range(starting_frame, ending_frame + cutoff):
 		print("SAVING: ", point, " / ", (ending_frame + cutoff) - starting_frame)
@@ -600,6 +601,7 @@ func render(starting_frame: int, ending_frame: int):
 	$Path.hide()
 	$Markers.show()
 	$MarkersMenu.show()
+	$AudioCuesPanel.show()
 	
 	set_physics_process(true)
 	DisplayServer.window_set_flag(resize_disabled, false)
