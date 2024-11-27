@@ -1,36 +1,36 @@
 extends Control
 
-var TOP:float
-var BOTTOM:float
+var TOP: float
+var BOTTOM: float
 
-var top_color:Color = Color.WHITE
-var top_color_active:Color = Color.AQUAMARINE
+var top_color: Color = Color.WHITE
+var top_color_active: Color = Color.AQUAMARINE
 
-var bottom_color:Color = Color.WHITE
-var bottom_color_active:Color = Color.CORAL
+var bottom_color: Color = Color.WHITE
+var bottom_color_active: Color = Color.CORAL
 
-var hold_breath_ball_color:Color = Color.DEEP_PINK
-var hold_breath_path_color:Color = Color.PINK
+var hold_breath_ball_color: Color = Color.DEEP_PINK
+var hold_breath_path_color: Color = Color.PINK
 
-var path:PackedFloat32Array
-var path_speed:float
-var path_area:int
+var path: PackedFloat32Array
+var path_speed: float
+var path_area: int
 
-var marker_data:Dictionary
+var marker_data: Dictionary
 
-var frame:int
-var step:int
+var frame: int
+var step: int
 
 # Used for understanding the depth change between frames
-var last_frame_depth:float = -1
+var last_frame_depth: float = -1
 
-const MOUSE_WHEEL_ACCELERATOR:int = 5
-const DRAG_RESISTANCE:float = 4
+const MOUSE_WHEEL_ACCELERATOR: int = 5
+const DRAG_RESISTANCE: float = 4
 
-var shift_pressed:bool
-var control_pressed:bool
+var shift_pressed: bool
+var control_pressed: bool
 
-var input_disabled:bool
+var input_disabled: bool
 
 enum Effects {
 	HOLD_BREATH = 1
@@ -51,21 +51,21 @@ func _ready():
 func _physics_process(delta):
 	if %Play.button_pressed:
 		if not %AudioStreamPlayer.stream_paused:
-			if frame+1 < path.size() - 1:
+			if frame + 1 < path.size() - 1:
 
 				if %MarkerSounds.is_enabled():
 					%MarkerSounds.play_marker_sound(frame, marker_data)
 
-				if sign(path[frame+1]) > -1:
-					var current_depth = path[frame+1]
+				if sign(path[frame + 1]) > -1:
+					var current_depth = path[frame + 1]
 					if last_frame_depth != -1 and last_frame_depth != current_depth:
 						var depth_change = current_depth - last_frame_depth
 						if %OSSMSounds.is_enabled:
 							%OSSMSounds.simulate_ossm(current_depth, depth_change)
 
-					place_ball(path[frame+1])
+					place_ball(path[frame + 1])
 					toggle_ball_visible(true)
-					last_frame_depth = path[frame+1]
+					last_frame_depth = path[frame + 1]
 					
 				elif $Menu/Controls/Paths.is_anything_selected():
 					if not %Record.button_pressed:
@@ -87,10 +87,10 @@ func _physics_process(delta):
 			%Record.button_pressed = false
 
 
-func line_colors(point:int) -> void:
+func line_colors(point: int) -> void:
 	if path.size() < 4:
 		return
-	var previous = [path[point], path[point-1], path[point-2], path[point-3]]
+	var previous = [path[point], path[point - 1], path[point - 2], path[point - 3]]
 	if previous.has(1.0):
 		$TopLine.self_modulate = top_color_active
 	else:
@@ -119,7 +119,7 @@ func save_path():
 	else:
 		var track_list = %Controls.get_node('TrackSelection')
 		var track_title = track_list.get_item_text(track_list.selected)
-		var path_name:String = Data.timestamp()
+		var path_name: String = Data.timestamp()
 		Data.save_path('user://Paths/' + track_title + "/" + path_name + ".bx")
 		%Controls.load_paths(track_title)
 		for i in paths.item_count:
@@ -129,14 +129,14 @@ func save_path():
 
 
 func get_ease_direction(depth) -> int:
-	var ease:int
+	var ease: int
 	if depth >= get_ball_depth():
 		return $MarkersMenu/HBox/EaseUp.selected
 	else:
 		return $MarkersMenu/HBox/EaseDown.selected
 
 
-func toggle_ball_visible(toggled:bool) -> void:
+func toggle_ball_visible(toggled: bool) -> void:
 	$Ball.modulate.a = max(float(toggled), 0.3)
 
 
@@ -144,15 +144,15 @@ func get_ball_depth() -> float:
 	return abs(($Ball.position.y - BOTTOM) / (TOP - BOTTOM))
 
 
-func place_ball(depth:float) -> void:
+func place_ball(depth: float) -> void:
 	$Ball.position.y = BOTTOM + depth * (TOP - BOTTOM)
 	if not $Markers.selected_marker:
 		$MarkersMenu/HBox/Depth/Input.value = get_ball_depth()
 
 
-func place_marker(depth:float) -> void:
+func place_marker(depth: float) -> void:
 	var easing = get_ease_direction(depth)
-	var min_frames:int = $Markers.SEPARATION_MIN
+	var min_frames: int = $Markers.SEPARATION_MIN
 	for i in range(frame - min_frames, frame + min_frames + 1):
 		if marker_data.has(i):
 			return
@@ -164,12 +164,12 @@ func place_marker(depth:float) -> void:
 	place_ball(depth)
 
 
-func frame_scrub(frame_movement:float) -> void:
+func frame_scrub(frame_movement: float) -> void:
 	last_frame_depth = -1
 	connect_sliders_signal()
 	frame = clamp(frame - frame_movement, 0, path.size() - 10)
-	if sign(path[frame+1]) > -1:
-		place_ball(path[frame+1])
+	if sign(path[frame + 1]) > -1:
+		place_ball(path[frame + 1])
 	$Markers.position.x += path_speed * frame_movement
 	%Controls.scrub(frame / float(path.size() - 1))
 	var slider = $TrackSliderLarge
@@ -271,14 +271,14 @@ func _input(event):
 		if event.is_action_pressed('ease_' + str(easing)):
 			easing_input(easing)
 
-func move_to_marker(marker:Node):
+func move_to_marker(marker: Node):
 	frame = marker.frame
 	if $Markers.selected_marker:
 		$Markers.selected_marker.get_node('Button').button_pressed = false
 	marker.get_node('Button').button_pressed = true
 	update_display()
 
-func depth_input(input:int):
+func depth_input(input: int):
 	if %Record.button_pressed:
 		place_marker(float(input) / 10)
 	elif $Markers.selected_marker:
@@ -287,12 +287,12 @@ func depth_input(input:int):
 		place_ball(float(input) / 10)
 
 
-func trans_input(input:int):
+func trans_input(input: int):
 	$MarkersMenu/HBox/Trans.select(input)
 	$MarkersMenu/HBox/Trans.emit_signal('item_selected', input)
 
 
-func easing_input(input:int):
+func easing_input(input: int):
 	if $Markers.selected_marker:
 		if input > 3:
 			input -= 4
@@ -307,7 +307,7 @@ func easing_input(input:int):
 			$Markers._on_down_easing_selected(input - 4)
 
 
-func _on_record_toggled(active:bool):
+func _on_record_toggled(active: bool):
 	if active:
 		%Play.button_pressed = true
 		$Header/Play.hide()
@@ -327,7 +327,7 @@ func _on_record_toggled(active:bool):
 		if not paths.is_anything_selected():
 			var track_list = $Menu/Controls/TrackSelection
 			var track_title = track_list.get_item_text(track_list.selected)
-			var path_name:String = Data.timestamp()
+			var path_name: String = Data.timestamp()
 			var f_name = 'user://Paths/' + track_title + "/" + path_name + ".bx"
 			Data.save_path(f_name)
 			%Controls.load_paths(track_title)
@@ -365,10 +365,10 @@ func _on_render_pressed():
 	$RenderRange.popup_centered()
 
 
-var active_effects:Dictionary
-@export var flash_curve:Curve
-@export var path_flash_curve:Curve
-func render(starting_frame:int, ending_frame:int):
+var active_effects: Dictionary
+@export var flash_curve: Curve
+@export var path_flash_curve: Curve
+func render(starting_frame: int, ending_frame: int):
 	var selected_take = $Menu/Controls/Paths.get_selected_items()[0]
 	var path_name = $Menu/Controls/Paths.get_item_text(selected_take)
 	var selected_track = $Menu/Controls/TrackSelection.selected
@@ -384,30 +384,30 @@ func render(starting_frame:int, ending_frame:int):
 	var borderless = DisplayServer.WINDOW_FLAG_BORDERLESS
 	var folder_name = path_name.trim_suffix('.bin')
 
-	var ball_color_a:Color = $Ball.self_modulate
-	var ball_color_b:Color = hold_breath_ball_color
+	var ball_color_a: Color = $Ball.self_modulate
+	var ball_color_b: Color = hold_breath_ball_color
 	
-	var path_color_a:Color = $Path.self_modulate
-	var path_color_b:Color = hold_breath_path_color
+	var path_color_a: Color = $Path.self_modulate
+	var path_color_b: Color = hold_breath_path_color
 	
 	var flash_total := 120
 	var flash_frames := 120
 	
-	var flash_active:bool
+	var flash_active: bool
 	
 	const _auxiliary_functions := 8
 	
 	#parse aux data
-	var _aux_data:Dictionary
+	var _aux_data: Dictionary
 	for i in _auxiliary_functions:
 		_aux_data[i + 1] = []
 	var marker_list = marker_data.keys()
 	marker_list.sort()
 	for marker_frame in marker_list:
-		var auxiliary:int = marker_data[marker_frame][3]
+		var auxiliary: int = marker_data[marker_frame][3]
 		for i in _auxiliary_functions:
 			if auxiliary & 1 << i:
-				var index:int = marker_list.find(marker_frame)
+				var index: int = marker_list.find(marker_frame)
 				for marker in range(index, marker_list.size()):
 					if not _aux_data[i + 1].has(index):
 						if int(marker_data[marker_list[marker]][3]) & 1 << i:
@@ -416,7 +416,7 @@ func render(starting_frame:int, ending_frame:int):
 								_aux_data[i + 1].append(index)
 						else:
 							break
-	var _empty_sections:Array
+	var _empty_sections: Array
 	for section in _aux_data:
 		if _aux_data[section].is_empty():
 			_empty_sections.append(section)
@@ -424,10 +424,10 @@ func render(starting_frame:int, ending_frame:int):
 		_aux_data.erase(section)
 	
 	#sequence aux data
-	var _aux_sequenced:Dictionary
+	var _aux_sequenced: Dictionary
 	for section in _aux_data:
-		var sequences:Array
-		var current_sequence:Array
+		var sequences: Array
+		var current_sequence: Array
 		var input_array = _aux_data[section]
 		for i in input_array.size():
 			if i == 0 or input_array[i] == input_array[i - 1] + 1:
@@ -440,7 +440,7 @@ func render(starting_frame:int, ending_frame:int):
 		_aux_sequenced[section] = sequences
 	
 	#format aux data
-	var aux_effects:Dictionary
+	var aux_effects: Dictionary
 	for section in _aux_sequenced:
 		aux_effects[section] = {}
 		for sequence in _aux_sequenced[section]:
@@ -485,7 +485,7 @@ func render(starting_frame:int, ending_frame:int):
 	
 	$Header/MenuButton.hide()
 	
-	var _distance_adjust:int
+	var _distance_adjust: int
 	match int(path_speed):
 		7:
 			_distance_adjust = -1
@@ -500,7 +500,7 @@ func render(starting_frame:int, ending_frame:int):
 	var _ball_distance = path_origin.x - $Ball.position.x
 	var distance = ceil(_ball_distance / path_speed) + _distance_adjust
 	
-	var _cutoff_adjust:int
+	var _cutoff_adjust: int
 	match int(path_speed):
 		10:
 			_cutoff_adjust = -8
@@ -534,12 +534,12 @@ func render(starting_frame:int, ending_frame:int):
 	$MarkersMenu.hide()
 	
 	for point in range(starting_frame, ending_frame + cutoff):
-		print("SAVING: ",point," / ", (ending_frame + cutoff) - starting_frame)
-		if point+1 < path.size() and path[point+1] > -1:
-			path_origin.y = BOTTOM + path[point+1] * (TOP - BOTTOM)
+		print("SAVING: ", point, " / ", (ending_frame + cutoff) - starting_frame)
+		if point + 1 < path.size() and path[point + 1] > -1:
+			path_origin.y = BOTTOM + path[point + 1] * (TOP - BOTTOM)
 		if point - distance < path.size() and point > distance:
-			if path[point-distance] > -1 and point-distance >= starting_frame:
-				var render_pos = BOTTOM + path[point-distance] * (TOP - BOTTOM)
+			if path[point - distance] > -1 and point - distance >= starting_frame:
+				var render_pos = BOTTOM + path[point - distance] * (TOP - BOTTOM)
 				$Ball.position.y = render_pos
 				line_colors(point - distance)
 		for effect in aux_effects:
@@ -558,7 +558,7 @@ func render(starting_frame:int, ending_frame:int):
 			match effect:
 				Effects.HOLD_BREATH:
 					var effect_time = active_effects[effect]
-					var total_time:int = flash_frames
+					var total_time: int = flash_frames
 					if effect_time > flash_total:
 						if flash_frames > 0:
 							var count = 1 - flash_frames / float(flash_total)
@@ -627,8 +627,8 @@ func connect_sliders_signal():
 
 
 func update_display() -> void:
-	var center:Vector2 = get_viewport_rect().size / 2
-	var line_offset:Vector2
+	var center: Vector2 = get_viewport_rect().size / 2
+	var line_offset: Vector2
 	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_MAXIMIZED:
 		line_offset = Vector2(21, 15)
 	else:
@@ -654,19 +654,7 @@ func update_display() -> void:
 			marker.line.position.y += position_difference
 	await get_tree().process_frame
 	$Markers.position_markers()
-	if not path.is_empty() and sign(path[frame+1]) > -1:
-		place_ball(path[frame+1])
+	if not path.is_empty() and sign(path[frame + 1]) > -1:
+		place_ball(path[frame + 1])
 	else:
 		place_ball(0)
-
-
-# func get_previous_marker(frame:int) -> Array:
-# 	var marker_list = marker_data.keys()
-# 	marker_list.sort()
-# 	var index = marker_list.find(frame)
-# 	if index > 0:
-# 		return marker_data[marker_list[index-1]]
-# 	return [0, 0, 0, 0]
-
-# func is_frame_marker(frame:int) -> bool:
-# 	return marker_data.has(frame)

@@ -2,13 +2,13 @@ extends Control
 
 var marker_scene: PackedScene = preload("res://Scenes/Marker/marker.tscn")
 
-var marker_list:Dictionary
+var marker_list: Dictionary
 var selected_marker: Marker
-var selected_multi_markers:Array
+var selected_multi_markers: Array
 
-var clipboard:Dictionary
+var clipboard: Dictionary
 
-var selecting_to_edge:bool
+var selecting_to_edge: bool
 
 const SEPARATION_MIN := 5
 
@@ -21,7 +21,7 @@ func _ready():
 		input.focus_entered.connect(input_focus_entered)
 		input.focus_exited.connect(input_focus_exited)
 
-var are_gaps_shown:bool:
+var are_gaps_shown: bool:
 	set(value):
 		if value:
 			show_gaps()
@@ -57,7 +57,6 @@ func _input(event):
 				node.release_focus()
 
 		
-
 func center_selected_marker():
 	if not selected_marker:
 		return
@@ -73,10 +72,10 @@ func show_gaps():
 	
 	for i in range(markers.size() - 1):
 		var gap_label: Node = gap_label_scene.instantiate()
-		var gap = get_distance(markers[i], markers[i+1])
+		var gap = get_distance(markers[i], markers[i + 1])
 		# gap_label.position = visible_markers[i].position
-		gap_label.position = (markers[i].position + markers[i+1].position) / 2
-		gap_label.position.y = 380		
+		gap_label.position = (markers[i].position + markers[i + 1].position) / 2
+		gap_label.position.y = 380
 		gap_label.text = str(gap)
 		%GapLabels.add_child(gap_label)
 	%GapLabels.show()
@@ -112,7 +111,7 @@ func set_markers():
 		connect_marker(frame)
 
 
-func add_marker(frame, depth, trans=null, ease=null, auxiliary=0):
+func add_marker(frame, depth, trans = null, ease = null, auxiliary = 0):
 	var marker: Marker = marker_scene.instantiate()
 	marker.show()
 	for node in marker_list.values():
@@ -141,7 +140,7 @@ func add_marker(frame, depth, trans=null, ease=null, auxiliary=0):
 	add_child(marker)
 
 
-var mouse_movement:Vector2
+var mouse_movement: Vector2
 func _on_marker_gui_input(event, input_marker):
 	if %Play.button_pressed:
 		return
@@ -159,11 +158,11 @@ func _on_marker_gui_input(event, input_marker):
 		mouse_movement = Vector2(0, 0)
 
 
-func marker_toggled(button_pressed:bool, marker:Node):
+func marker_toggled(button_pressed: bool, marker: Node):
 	if button_pressed and %Play.button_pressed:
 		return
-	if mouse_movement != Vector2(0,0):
-		mouse_movement = Vector2(0,0)
+	if mouse_movement != Vector2(0, 0):
+		mouse_movement = Vector2(0, 0)
 		if marker == selected_marker:
 			marker.get_node('%Button').set_pressed_no_signal(true)
 		else:
@@ -219,7 +218,7 @@ func marker_toggled(button_pressed:bool, marker:Node):
 				aux_list.set_item_checked(i, true)
 			else:
 				aux_list.set_item_checked(i, false)
-		var index:int = get_marker_index(frame)
+		var index: int = get_marker_index(frame)
 		selected_marker = marker
 		set_marker_menu_mode(MARKER_MENU.HAS_SELECTION)
 		set_marker_movement_range()
@@ -246,18 +245,18 @@ func marker_toggled(button_pressed:bool, marker:Node):
 func set_marker_movement_range():
 	if not selected_marker:
 		return
-	var markers:Array
+	var markers: Array
 	markers.append(selected_marker)
 	for marker in selected_multi_markers:
 		markers.append(marker)
 	var keys = marker_list.keys()
 	keys.sort()
-	var indices:Array
+	var indices: Array
 	for marker: Marker in markers:
 		indices.append(keys.find(marker.frame))
 	indices.sort()
-	var sequences:Array
-	var _sequence:Array
+	var sequences: Array
+	var _sequence: Array
 	for i in indices.size():
 		_sequence.append(keys[indices[i]])
 		if i == indices.size() - 1 or indices[i] + 1 != indices[i + 1]:
@@ -285,7 +284,7 @@ func set_marker_movement_range():
 				movement_min = movement_left
 			if not movement_max or movement_right < movement_max:
 				movement_max = movement_right
-	var origin:int = selected_marker.frame
+	var origin: int = selected_marker.frame
 	if frame_input.is_connected('value_changed', _on_frame_value_changed):
 		frame_input.value_changed.disconnect(_on_frame_value_changed)
 	frame_input.min_value = origin - movement_min
@@ -298,23 +297,23 @@ func get_marker_depth(marker) -> float:
 	return abs((marker.position.y - owner.BOTTOM) / (owner.TOP - owner.BOTTOM))
 
 
-func get_marker_index(frame:int) -> int:
+func get_marker_index(frame: int) -> int:
 	var keys = marker_list.keys()
 	keys.sort()
 	return keys.find(frame)
 
-func get_previous_marker(frame:int) -> Marker:
+func get_previous_marker(frame: int) -> Marker:
 	var frames = owner.marker_data.keys()
 	frames.sort()
 	var previous_marker = null
 	for marker_frame in frames:
 		if marker_frame < frame:
 			previous_marker = marker_list[marker_frame]
-		else:	
+		else:
 			break
 	return previous_marker
 
-func get_next_marker(frame:int) -> Marker:
+func get_next_marker(frame: int) -> Marker:
 	var frames = owner.marker_data.keys()
 	frames.sort()
 	for marker_frame in frames:
@@ -322,7 +321,7 @@ func get_next_marker(frame:int) -> Marker:
 			return marker_list[marker_frame]
 	return null
 
-func get_previous_marker_frame(frame:int, look_back:=1) -> int:
+func get_previous_marker_frame(frame: int, look_back := 1) -> int:
 	var frames = owner.marker_data.keys()
 	frames.sort()
 	var previous_frames = []
@@ -338,7 +337,7 @@ func get_previous_marker_frame(frame:int, look_back:=1) -> int:
 	else:
 		return frames.front()
 
-func get_next_marker_frame(frame:int, look_forward:=1) -> int:
+func get_next_marker_frame(frame: int, look_forward := 1) -> int:
 	var frames = owner.marker_data.keys()
 	frames.sort()
 	var next_frames = []
@@ -352,7 +351,7 @@ func get_next_marker_frame(frame:int, look_forward:=1) -> int:
 	else:
 		return frames.back()
 
-func connect_marker(frame:int, connect_next:=true) -> void:
+func connect_marker(frame: int, connect_next := true) -> void:
 	if frame == 0 or not marker_list.has(frame):
 		return
 	var previous_frame = get_previous_marker_frame(frame)
@@ -391,7 +390,7 @@ func connect_all_markers():
 		connect_marker(marker)
 
 
-func clear_ahead(frame:int):
+func clear_ahead(frame: int):
 	var start_frame = get_previous_marker_frame(frame)
 	var end_frame = get_next_marker_frame(frame)
 	if end_frame == 0:
@@ -407,12 +406,12 @@ func place_ball_on_path():
 
 
 func position_markers():
-	var center:Vector2 = get_viewport_rect().size / 2
+	var center: Vector2 = get_viewport_rect().size / 2
 	var diff = center.x - (owner.frame * owner.path_speed) - position.x
 	position.x = center.x - (owner.frame * owner.path_speed)
 
 
-func select_to(index:int):
+func select_to(index: int):
 	if not selected_marker:
 		return
 	var selected_frame = selected_marker.frame
@@ -423,7 +422,7 @@ func select_to(index:int):
 	selected_multi_markers.clear()
 	selected_marker = selected_marker_copy
 	selected_marker.get_node('%Button').button_pressed = true
-	var sorted_markers:Array = marker_list.keys()
+	var sorted_markers: Array = marker_list.keys()
 	sorted_markers.sort()
 	selecting_to_edge = true
 	var target_frame = sorted_markers[index]
@@ -432,17 +431,17 @@ func select_to(index:int):
 	selecting_to_edge = false
 
 
-func _on_frame_value_changed(value:int):
+func _on_frame_value_changed(value: int):
 	if not selected_marker:
 		return
 	var movement = value - selected_marker.frame
-	var markers:Array
+	var markers: Array
 	markers.append(selected_marker)
 	for marker in selected_multi_markers:
 		markers.append(marker)
 	
-	var orig_frames:Array
-	var new_frames:Array
+	var orig_frames: Array
+	var new_frames: Array
 	for marker in markers:
 		var orig_frame = marker.frame
 		var new_frame = orig_frame + movement
@@ -477,12 +476,12 @@ func _on_depth_value_changed(value):
 	if not selected_marker:
 		return
 	var movement = value - selected_marker.depth
-	var markers:Array
-	var marker_movement:Dictionary
+	var markers: Array
+	var marker_movement: Dictionary
 	markers.append(selected_marker)
 	for marker in selected_multi_markers:
 		markers.append(marker)
-	var confined_movement:float = movement
+	var confined_movement: float = movement
 	for marker in markers:
 		var new_pos = marker.depth + movement
 		if new_pos > 1 and 1 - marker.depth < confined_movement:
@@ -507,7 +506,7 @@ func _on_trans_selected(index):
 	Data.set_config('easings', 'trans', index)
 	if not selected_marker:
 		return
-	var markers:Array
+	var markers: Array
 	markers.append(selected_marker)
 	for marker in selected_multi_markers:
 		markers.append(marker)
@@ -523,7 +522,7 @@ func _on_trans_selected(index):
 func _on_easing_selected(index):
 	if not selected_marker:
 		return
-	var markers:Array
+	var markers: Array
 	markers.append(selected_marker)
 	for marker in selected_multi_markers:
 		markers.append(marker)
@@ -545,7 +544,7 @@ func _on_down_easing_selected(index):
 
 
 enum MARKER_MENU {NOTHING_SELECTED, HAS_SELECTION}
-func set_marker_menu_mode(mode:int):
+func set_marker_menu_mode(mode: int):
 	if not selected_marker:
 		mode = MARKER_MENU.NOTHING_SELECTED
 	match mode:
@@ -566,7 +565,7 @@ func set_marker_menu_mode(mode:int):
 			%MarkersMenu/HBox/AuxiliaryFunctions.show()
 			frame_input.editable = true
 			depth_input.editable = true
-			var markers:Array
+			var markers: Array
 			markers.append(selected_marker)
 			for marker in selected_multi_markers:
 				markers.append(marker)
@@ -581,7 +580,7 @@ func frame_is_zero(marker) -> bool:
 		return true
 	return false
 
-func is_frame_marker(frame:int) -> bool:
+func is_frame_marker(frame: int) -> bool:
 	return marker_list.has(frame)
 
 func _on_add_marker_mouse_entered():
@@ -629,8 +628,8 @@ func _on_copy_pressed():
 	
 	clipboard.clear()
 	
-	var selection:Array
-	var frame_list:Array
+	var selection: Array
+	var frame_list: Array
 	
 	selection.append(selected_marker)
 	frame_list.append(selected_marker.frame)
@@ -666,7 +665,7 @@ func _on_paste_pressed():
 		var ease = clipboard[marker][2]
 		var auxiliary = clipboard[marker][3]
 		
-		var collision:bool
+		var collision: bool
 		if frame >= owner.path.size():
 			collision = true
 		for i in range(frame - SEPARATION_MIN + 1, frame + SEPARATION_MIN + 1):
@@ -699,7 +698,7 @@ func _on_delete_pressed():
 	if not selected_marker and selected_multi_markers.is_empty():
 		return
 	if selected_multi_markers.is_empty():
-		var frame:int = selected_marker.frame
+		var frame: int = selected_marker.frame
 		if frame == 0:
 			return
 		var next_frame = get_next_marker_frame(frame)
@@ -714,7 +713,7 @@ func _on_delete_pressed():
 		selected_marker.queue_free()
 		connect_marker(next_frame, false)
 	else:
-		var del_markers:Array
+		var del_markers: Array
 		if selected_marker:
 			if selected_marker.frame != 0:
 				del_markers.append(selected_marker)
@@ -723,7 +722,7 @@ func _on_delete_pressed():
 			if marker.frame != 0:
 				del_markers.append(marker)
 		for marker in del_markers:
-			var frame:int = marker.frame
+			var frame: int = marker.frame
 			var previous_frame = get_previous_marker_frame(frame)
 			var next_frame = get_next_marker_frame(frame)
 			marker_list.erase(frame)
@@ -743,7 +742,7 @@ func _on_delete_pressed():
 	selected_marker = null
 
 
-var mouse_over_marker:bool
+var mouse_over_marker: bool
 func _on_marker_mouse_entered():
 	mouse_over_marker = true
 
@@ -752,7 +751,7 @@ func _on_marker_mouse_exited():
 	mouse_over_marker = false
 
 
-var mouse_over_input:bool
+var mouse_over_input: bool
 func _on_input_mouse_entered():
 	mouse_over_input = true
 

@@ -42,16 +42,16 @@ func _ready():
 	get_popup().hide_on_checkable_item_selection = false
 
 
-func item_pressed(item:int):
+func item_pressed(item: int):
 	var selected_marker = %Markers.selected_marker
 	if not selected_marker:
 		return
 	get_popup().toggle_item_checked(item)
-	var markers:Array
+	var markers: Array
 	markers.append(selected_marker)
 	for marker in %Markers.selected_multi_markers:
 		markers.append(marker)
-	var active_functions:int
+	var active_functions: int
 	for index in get_popup().item_count:
 		if get_popup().is_item_checked(index):
 			active_functions += get_popup().get_item_id(index)
@@ -80,7 +80,7 @@ func _physics_process(delta):
 			var playback_pos = $AudioStreamPlayer.get_playback_position()
 			var seconds = str(int(playback_pos) % 60).lpad(2, \"0\")
 			var minutes = str(int(playback_pos) / 60).lpad(2, \"0\")
-			var track_time:String = minutes + \":\" + seconds
+			var track_time: String = minutes + \":\" + seconds
 			%TrackSliderLarge.get_node('TrackTime').text = track_time
 			slider.set_value(playback_pos / track_length)
 			update_marker_menu()
@@ -143,9 +143,9 @@ func load_tracks() -> void:
 	$TrackSelection.selected = selected
 
 
-func load_paths(track_title:String, scrub:=false) -> void:
+func load_paths(track_title: String, scrub := false) -> void:
 	var dir := DirAccess.open('user://Paths/' + track_title)
-	var list:PackedStringArray
+	var list: PackedStringArray
 	$Render.disabled = true
 	$Paths.clear()
 	%Markers.selected_multi_markers.clear()
@@ -184,7 +184,7 @@ func _on_track_selected(index):
 	scrub(0)
 
 
-var last_path_index:int = -1
+var last_path_index: int = -1
 func _on_path_selected(index):
 	if %Markers.selected_marker and is_instance_valid(%Markers.selected_marker):
 		%Markers.marker_toggled(false, %Markers.selected_marker)
@@ -227,7 +227,7 @@ func _on_paths_item_clicked(index, at_position, mouse_button_index):
 		$Paths/EditPath.popup_centered()
 		$Paths/EditPath.dir = DirAccess.open('user://Paths')
 		var selected_track = $TrackSelection.selected
-		var track_title:String = $TrackSelection.get_item_text(selected_track)
+		var track_title: String = $TrackSelection.get_item_text(selected_track)
 		$Paths/EditPath.track_title = track_title
 		$Paths/EditPath.file_name = $Paths.get_item_text(index)
 		$Paths/EditPath/LineEdit.text = $Paths.get_item_text(index)
@@ -294,15 +294,15 @@ func _on_pause_mouse_exited():
 [sub_resource type="GDScript" id="GDScript_snsh4"]
 script/source = "extends ConfirmationDialog
 
-var track_title:String
-var file_name:String
+var track_title: String
+var file_name: String
 
-var dir:DirAccess
+var dir: DirAccess
 
 func _ready():
 	$LineEdit.connect('text_changed', text_filter.bind($LineEdit))
 	$Copy/LineEdit.connect('text_changed', text_filter.bind($Copy/LineEdit))
-	get_child(2,true).get_child(3,true).hide()
+	get_child(2, true).get_child(3, true).hide()
 	add_button(\"COPY\", true, 'copy')
 	add_button(\"DELETE\", true, 'delete')
 
@@ -341,9 +341,9 @@ func _on_delete_confirmed():
 	owner.define_path()
 
 
-func text_filter(new_text:String, input_node:Node):
+func text_filter(new_text: String, input_node: Node):
 	var disallowed_chars = ['/', '\\\\', ':', '*', '?', '\"', '<', '>', '|']
-	var filtered_text:String
+	var filtered_text: String
 	for char in new_text:
 		if not disallowed_chars.has(char):
 			filtered_text += char
@@ -378,7 +378,7 @@ func _ready():
 			\"focus_exited\",
 			_on_input_focus_exited.bind(node))
 	
-	var config:ConfigFile = Data.config
+	var config: ConfigFile = Data.config
 	config.load(Data.config_path)
 	
 	if config.has_section_key('path', 'path_thickness'):
@@ -429,7 +429,7 @@ func _on_path_fade_value_changed(value):
 
 
 func _on_change_colors_pressed():
-	var colors:Node = get_node('../Colors')
+	var colors: Node = get_node('../Colors')
 	colors.get_node('TabBar').current_tab = 0
 	colors._on_tab_bar_tab_changed(0)
 	colors.show()
@@ -470,11 +470,11 @@ func _on_open_paths_pressed():
 	OS.shell_open(folder_path)
 
 
-var input_zone_active:bool
-var input_zone_begin:Vector2
-var input_zone_end:Vector2
+var input_zone_active: bool
+var input_zone_begin: Vector2
+var input_zone_end: Vector2
 
-func _on_input_focus_entered(node:Control):
+func _on_input_focus_entered(node: Control):
 	owner.input_disabled = true
 	input_zone_active = true
 	var global_pos = node.global_position
@@ -482,14 +482,14 @@ func _on_input_focus_entered(node:Control):
 	input_zone_end = global_pos + node.size
 
 
-func _on_input_focus_exited(node:Control):
+func _on_input_focus_exited(node: Control):
 	owner.input_disabled = false
 	input_zone_active = false
 
 func _input(event):
 	if not input_zone_active:
 		return
-	var release_focus:bool
+	var release_focus: bool
 	if event is InputEventMouseButton and event.is_pressed():
 		var pos = event.global_position
 		if pos.x < input_zone_begin.x or pos.x > input_zone_end.x:
@@ -524,7 +524,7 @@ func _ready():
 			$OptionButton.select(1)
 
 func _on_option_button_item_selected(index):
-	var display_mode:int
+	var display_mode: int
 	match index:
 		0:
 			display_mode = DisplayServer.WINDOW_MODE_WINDOWED
@@ -537,10 +537,10 @@ func _on_option_button_item_selected(index):
 [sub_resource type="GDScript" id="GDScript_ywdvr"]
 script/source = "extends VBoxContainer
 
-var selected:Node
+var selected: Node
 
 func _on_color_picker_color_changed(color):
-	match $TabBar.current_tab:
+	match$TabBar.current_tab:
 		0:
 			owner.toggle_ball_visible(true)
 			selected.set_self_modulate(color)
@@ -574,7 +574,7 @@ func _on_color_picker_color_changed(color):
 
 
 func _on_tab_bar_tab_changed(tab):
-	var selected_color:Color
+	var selected_color: Color
 	match tab:
 		0:
 			selected = owner.get_node('Ball')
@@ -606,7 +606,7 @@ func _on_tab_bar_tab_changed(tab):
 	$ColorPicker.color = selected_color
 
 
-func change_path_color(input_color:Color):
+func change_path_color(input_color: Color):
 	owner.get_node('Path').self_modulate = input_color
 	for node in get_tree().get_nodes_in_group('lines'):
 		node.set_self_modulate(input_color)
@@ -694,7 +694,7 @@ func _on_toggled(button_pressed):
 [sub_resource type="GDScript" id="GDScript_8l1ut"]
 script/source = "extends TextureButton
 
-var tween:Tween
+var tween: Tween
 
 @onready var menu = owner.get_node('Menu')
 @onready var options_button = get_node('../OptionsButton')
@@ -725,10 +725,10 @@ func _on_mouse_exited():
 func _on_toggled(button_pressed):
 	tween = get_tree().create_tween()
 	tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART).set_parallel()
-	var menu_pos:float
-	var options_pos:float
-	var exit_pos:float
-	var alpha:float
+	var menu_pos: float
+	var options_pos: float
+	var exit_pos: float
+	var alpha: float
 	if button_pressed:
 		for node in [get_node('../Record'), get_node('../Play')]:
 			node.modulate.a = 0
@@ -758,7 +758,7 @@ func _on_toggled(button_pressed):
 	tween.tween_property(exit_button, 'modulate:a', alpha, 0.4)
 
 
-func ui_mouse_filter(active:bool) -> void:
+func ui_mouse_filter(active: bool) -> void:
 	if active:
 		options_button.mouse_filter = MOUSE_FILTER_STOP
 		exit_button.mouse_filter = MOUSE_FILTER_STOP
@@ -808,8 +808,8 @@ func _on_custom_action(action):
 [sub_resource type="GDScript" id="GDScript_cijm8"]
 script/source = "extends Panel
 
-var positions:Array
-var phase:int
+var positions: Array
+var phase: int
 
 enum NoteDuration {
 	WHOLE = 1,
@@ -829,8 +829,8 @@ func _on_generate_pressed():
 	var length = $Inputs/Length/SpinBox.value
 	var height = $Inputs/Positions/Height/SpinBox.value
 	var depth = $Inputs/Positions/Depth/SpinBox.value
-	var starting_frame:int = owner.frame
-	var current_frame:int = starting_frame
+	var starting_frame: int = owner.frame
+	var current_frame: int = starting_frame
 	phase = $Inputs/StartingPosition/Positions/OptionButton.selected
 	if $Inputs/StartingPosition/Flat/CheckBox.button_pressed:
 		if phase == 0:
@@ -871,11 +871,11 @@ func get_beat_frames(starting_frame: int, song_bpm: float, total_beats: int, not
 	print(beat_frames)
 	return beat_frames
 
-func create_marker(frame:int, depth):
+func create_marker(frame: int, depth):
 	phase = abs(phase - 1)
 	if frame >= owner.path.size():
 		return
-	var min_frames:int = %Markers.SEPARATION_MIN
+	var min_frames: int = %Markers.SEPARATION_MIN
 	for i in range(frame - min_frames + 1, frame + min_frames + 1):
 		if owner.marker_data.has(i):
 			return

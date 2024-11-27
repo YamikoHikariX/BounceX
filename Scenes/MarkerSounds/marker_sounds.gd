@@ -53,3 +53,4 @@ func play_marker_sound(frame: int, marker_data: Dictionary) -> void:
 						%MarkerSounds.play_high()
 					Tone.LOW:
 						%MarkerSounds.play_low()
+
