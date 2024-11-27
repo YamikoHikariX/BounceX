@@ -227,7 +227,7 @@ func _input(event):
 	
 	elif event.is_action_pressed("cancel"):
 		if $Markers.selected_marker:
-			$Markers.selected_marker.get_node('%Button').button_pressed = false
+			$Markers.selected_marker.button.button_pressed = false
 			$Markers.selected_multi_markers.clear()
 		elif %Record.button_pressed:
 			%Record.button_pressed = false
@@ -274,8 +274,8 @@ func _input(event):
 func move_to_marker(marker: Node):
 	frame = marker.frame
 	if $Markers.selected_marker:
-		$Markers.selected_marker.get_node('Button').button_pressed = false
-	marker.get_node('Button').button_pressed = true
+		$Markers.selected_marker.button.button_pressed = false
+	marker.button.button_pressed = true
 	update_display()
 
 func depth_input(input: int):
@@ -314,7 +314,7 @@ func _on_record_toggled(active: bool):
 		$Header/Record.show()
 		var marker_node = $Markers.selected_marker
 		if marker_node and is_instance_valid(marker_node):
-			marker_node.get_node('%Button').button_pressed = false
+			marker_node.button.button_pressed = false
 		toggle_ball_visible(true)
 		if $Markers.marker_list.size() == 1:
 			var depth = $Markers.marker_list[0].depth

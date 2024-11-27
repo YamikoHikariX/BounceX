@@ -67,7 +67,6 @@ func center_selected_marker():
 	frame_input.value = middle
 
 func show_gaps():
-	# var markers: Array[Marker] = get_visible_markers()
 	var markers = marker_list.values()
 	
 	for i in range(markers.size() - 1):
@@ -126,9 +125,8 @@ func add_marker(frame, depth, trans = null, ease = null, auxiliary = 0):
 		if int(auxiliary) & 1 << 0:
 			marker.self_modulate = Color.HOT_PINK
 	marker_list[frame] = marker
-	var marker_button = marker.get_node('%Button')
-	marker_button.toggled.connect(marker_toggled.bind(marker))
-	marker_button.gui_input.connect(_on_marker_gui_input.bind(marker))
+	marker.gui_input.connect(on_marker_gui_input)
+	marker.marker_toggled.connect(on_marker_toggled)
 	var render_pos = owner.BOTTOM + depth * (owner.TOP - owner.BOTTOM)
 	marker.frame = frame
 	marker.depth = depth
@@ -141,11 +139,11 @@ func add_marker(frame, depth, trans = null, ease = null, auxiliary = 0):
 
 
 var mouse_movement: Vector2
-func _on_marker_gui_input(event, input_marker):
+func on_marker_gui_input(event, marker: Marker):
 	if %Play.button_pressed:
 		return
-	if not selected_marker or input_marker != selected_marker:
-		if not selected_multi_markers.has(input_marker):
+	if not selected_marker or marker != selected_marker:
+		if not selected_multi_markers.has(marker):
 			return
 	if event is InputEventMouseMotion:
 			if event.button_mask & MOUSE_BUTTON_LEFT:
@@ -158,19 +156,19 @@ func _on_marker_gui_input(event, input_marker):
 		mouse_movement = Vector2(0, 0)
 
 
-func marker_toggled(button_pressed: bool, marker: Node):
+func on_marker_toggled(button_pressed: bool, marker: Marker):
 	if button_pressed and %Play.button_pressed:
 		return
 	if mouse_movement != Vector2(0, 0):
 		mouse_movement = Vector2(0, 0)
 		if marker == selected_marker:
-			marker.get_node('%Button').set_pressed_no_signal(true)
+			marker.button.set_pressed_no_signal(true)
 		else:
-			marker.get_node('%Button').set_pressed_no_signal(false)
+			marker.button.set_pressed_no_signal(false)
 		return
 	if not owner.control_pressed and not selecting_to_edge:
 		for node in selected_multi_markers:
-			node.get_node('%Button/Selected').hide()
+			node.selected.hide()
 		selected_multi_markers.clear()
 	if button_pressed:
 		if owner.shift_pressed and selected_marker or selecting_to_edge:
@@ -188,29 +186,29 @@ func marker_toggled(button_pressed: bool, marker: Node):
 				if marker_list[keys[index]] != selected_marker:
 					selected_multi_markers.append(marker_list[keys[index]])
 			for node in selected_multi_markers:
-				node.get_node('%Button/Selected').self_modulate = Color.PURPLE
-				node.get_node('%Button/Selected').show()
-				node.get_node('%Button').set_pressed_no_signal(false)
+				node.selected.self_modulate = Color.PURPLE
+				node.selected.show()
+				node.button.set_pressed_no_signal(false)
 			set_marker_movement_range()
 			return
 		elif owner.control_pressed and selected_marker:
 			if not selected_multi_markers.has(marker):
 				selected_multi_markers.append(marker)
-				marker.get_node('%Button/Selected').self_modulate = Color.PURPLE
-				marker.get_node('%Button/Selected').show()
-				marker.get_node('%Button').set_pressed_no_signal(false)
+				marker.selected.self_modulate = Color.PURPLE
+				marker.selected.show()
+				marker.button.set_pressed_no_signal(false)
 			else:
 				selected_multi_markers.erase(marker)
-				marker.get_node('%Button/Selected').hide()
-				marker.get_node('%Button').set_pressed_no_signal(false)
+				marker.selected.hide()
+				marker.button.set_pressed_no_signal(false)
 			set_marker_movement_range()
 			return
 		for node in marker_list.values():
 			if node != marker:
-				node.get_node('%Button').set_pressed_no_signal(false)
-				node.get_node('%Button/Selected').hide()
-		marker.get_node('%Button/Selected').self_modulate = Color.AQUAMARINE
-		marker.get_node('%Button/Selected').show()
+				node.button.set_pressed_no_signal(false)
+				node.selected.hide()
+		marker.selected.self_modulate = Color.AQUAMARINE
+		marker.selected.show()
 		var frame = marker.frame
 		var aux_list = %MarkersMenu/HBox/AuxiliaryFunctions.get_popup()
 		for i in aux_list.item_count:
@@ -237,7 +235,7 @@ func marker_toggled(button_pressed: bool, marker: Node):
 		depth_input.value = owner.get_ball_depth()
 		frame_input.value_changed.connect(_on_frame_value_changed)
 		depth_input.value_changed.connect(_on_depth_value_changed)
-		marker.get_node('%Button/Selected').hide()
+		marker.selected.hide()
 		set_marker_menu_mode(MARKER_MENU.NOTHING_SELECTED)
 		selected_marker = null
 
@@ -418,16 +416,16 @@ func select_to(index: int):
 	if selected_frame == 0 and index == 1:
 		return
 	var selected_marker_copy = selected_marker
-	selected_marker.get_node('%Button').button_pressed = false
+	selected_marker.button.button_pressed = false
 	selected_multi_markers.clear()
 	selected_marker = selected_marker_copy
-	selected_marker.get_node('%Button').button_pressed = true
+	selected_marker.button.button_pressed = true
 	var sorted_markers: Array = marker_list.keys()
 	sorted_markers.sort()
 	selecting_to_edge = true
 	var target_frame = sorted_markers[index]
 	if selected_frame != target_frame:
-		marker_toggled(true, marker_list[target_frame])
+		on_marker_toggled(true, marker_list[target_frame])
 	selecting_to_edge = false
 
 
@@ -678,9 +676,9 @@ func _on_paste_pressed():
 			connect_marker(frame)
 	
 	if selected_marker:
-		selected_marker.get_node('%Button').button_pressed = false
+		selected_marker.button.button_pressed = false
 		for node in selected_multi_markers:
-			node.get_node('%Button/Selected').hide()
+			node.selected.hide()
 		selected_multi_markers.clear()
 	
 	owner.save_path()
@@ -718,7 +716,7 @@ func _on_delete_pressed():
 			if selected_marker.frame != 0:
 				del_markers.append(selected_marker)
 		for marker in selected_multi_markers:
-			marker.get_node('%Button/Selected').hide()
+			marker.selected.hide()
 			if marker.frame != 0:
 				del_markers.append(marker)
 		for marker in del_markers:

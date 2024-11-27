@@ -187,7 +187,7 @@ func _on_track_selected(index):
 var last_path_index: int = -1
 func _on_path_selected(index):
 	if %Markers.selected_marker and is_instance_valid(%Markers.selected_marker):
-		%Markers.marker_toggled(false, %Markers.selected_marker)
+		%Markers.on_marker_toggled(false, %Markers.selected_marker)
 	if index == last_path_index:
 		unload_all()
 		owner.marker_data[0] = [0, 0, 0, 0]
