@@ -272,7 +272,7 @@ func _input(event):
 			easing_input(easing)
 
 func move_to_marker(marker:Node):
-	frame = marker.get_meta('frame')
+	frame = marker.frame
 	if $Markers.selected_marker:
 		$Markers.selected_marker.get_node('Button').button_pressed = false
 	marker.get_node('Button').button_pressed = true
@@ -317,7 +317,7 @@ func _on_record_toggled(active:bool):
 			marker_node.get_node('%Button').button_pressed = false
 		toggle_ball_visible(true)
 		if $Markers.marker_list.size() == 1:
-			var depth = $Markers.marker_list[0].get_meta('depth')
+			var depth = $Markers.marker_list[0].depth
 			path[frame] = depth
 			place_ball(depth)
 	else:
@@ -647,11 +647,11 @@ func update_display() -> void:
 	$Backdrop.set_end($BottomLine.get_end())
 	for marker in $Markers.marker_list.values():
 		var orig_pos = marker.position.y
-		var render_pos = BOTTOM + marker.get_meta('depth') * (TOP - BOTTOM)
+		var render_pos = BOTTOM + marker.depth * (TOP - BOTTOM)
 		var position_difference = render_pos - orig_pos
 		marker.position.y = render_pos
-		if marker.has_meta('line') and marker.get_meta('line'):
-			marker.get_meta('line').position.y += position_difference
+		if marker.line:
+			marker.line.position.y += position_difference
 	await get_tree().process_frame
 	$Markers.position_markers()
 	if not path.is_empty() and sign(path[frame+1]) > -1:

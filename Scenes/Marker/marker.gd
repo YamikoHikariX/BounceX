@@ -4,6 +4,9 @@ class_name Marker
 @onready var button: TextureButton = %Button
 @onready var selected: TextureRect = %Selected
 
-var frame: int:
-    get():
-        return get_meta("frame", 0)
+var frame: int
+var depth: float
+var trans: int
+var ease: int
+var auxiliary: int
+var line: Line2D

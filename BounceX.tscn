@@ -56,8 +56,7 @@ func item_pressed(item:int):
 		if get_popup().is_item_checked(index):
 			active_functions += get_popup().get_item_id(index)
 	for marker in markers:
-		var marker_frame = marker.get_meta('frame')
-		owner.marker_data[marker_frame][3] = active_functions
+		owner.marker_data[marker.frame][3] = active_functions
 		if active_functions & 1 << 0:
 			marker.self_modulate = Color.HOT_PINK
 		else:

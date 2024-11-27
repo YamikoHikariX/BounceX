@@ -37,7 +37,7 @@ func play_marker_sound(frame: int, marker_data: Dictionary) -> void:
 		var curr_marker = marker_data[frame]
 		var prev_marker = %Markers.get_previous_marker(frame)
 		if prev_marker == null: return
-		var prev_marker_depth = prev_marker.get_meta("depth")
+		var prev_marker_depth = prev_marker.depth
 		var curr_marker_depth = curr_marker[0]
 
 		if prev_marker_depth < curr_marker_depth:
