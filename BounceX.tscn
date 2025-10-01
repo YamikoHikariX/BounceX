@@ -1,10 +1,10 @@
 [gd_scene load_steps=46 format=3 uid="uid://ddntuwjds6r37"]
 
 [ext_resource type="Theme" uid="uid://4ddly4r83yek" path="res://Theme.tres" id="1_qtjw4"]
-[ext_resource type="Script" path="res://BounceX.gd" id="2_4ci4k"]
+[ext_resource type="Script" uid="uid://tjnpstnp4m7t" path="res://BounceX.gd" id="2_4ci4k"]
 [ext_resource type="FontFile" uid="uid://c2wtnhu46b5xf" path="res://Font/Rubik-Light.ttf" id="2_wwilv"]
 [ext_resource type="Texture2D" uid="uid://cbwqw7m1wqj64" path="res://Textures/Dot.svg" id="3_mj5xg"]
-[ext_resource type="Script" path="res://Markers.gd" id="3_votmw"]
+[ext_resource type="Script" uid="uid://efaio3ic8sn3" path="res://Markers.gd" id="3_votmw"]
 [ext_resource type="Curve" uid="uid://brt3xnflwm2r" path="res://Curves/FlashCurve.tres" id="3_wj01o"]
 [ext_resource type="Curve" uid="uid://dl3hfhb1q3xfn" path="res://Curves/PathFlashCurve.tres" id="4_8tbyk"]
 [ext_resource type="Texture2D" uid="uid://bkabq6ivbs23x" path="res://Textures/Circle.svg" id="4_rocsv"]
@@ -24,9 +24,9 @@
 [ext_resource type="Texture2D" uid="uid://dndicopykmmg2" path="res://Textures/Paste.svg" id="14_qcc21"]
 [ext_resource type="Texture2D" uid="uid://cvdu2l73nu3mw" path="res://Textures/Key Map.svg" id="16_2degy"]
 [ext_resource type="Texture2D" uid="uid://4gt7poc6r8ta" path="res://Textures/Right Click.png" id="17_cvd54"]
-[ext_resource type="Script" path="res://Scenes/MarkerSounds/marker_sounds.gd" id="25_vcsjj"]
+[ext_resource type="Script" uid="uid://mguh7r77no6w" path="res://Scenes/MarkerSounds/marker_sounds.gd" id="25_vcsjj"]
 [ext_resource type="AudioStream" uid="uid://c37ij4wee7rv8" path="res://Sounds/low.mp3" id="28_25wyv"]
-[ext_resource type="Script" path="res://Scenes/OSSMSounds/ossm_sounds.gd" id="29_6mi3l"]
+[ext_resource type="Script" uid="uid://kjiv8y8pqpvw" path="res://Scenes/OSSMSounds/ossm_sounds.gd" id="29_6mi3l"]
 [ext_resource type="PackedScene" uid="uid://cfp23f60du50n" path="res://Scenes/AudioCuesPanel/audio_cues_panel.tscn" id="29_ju3g4"]
 
 [sub_resource type="Gradient" id="Gradient_gixs1"]
@@ -1018,6 +1018,7 @@ focus_mode = 0
 selected = 1
 item_count = 11
 popup/item_0/text = "Linear"
+popup/item_0/id = 0
 popup/item_1/text = "Sine"
 popup/item_1/id = 1
 popup/item_2/text = "Quint"
@@ -1047,6 +1048,7 @@ focus_mode = 0
 selected = 2
 item_count = 4
 popup/item_0/text = "Ease In"
+popup/item_0/id = 0
 popup/item_1/text = "Ease Out"
 popup/item_1/id = 1
 popup/item_2/text = "Ease In/Out"
@@ -1061,6 +1063,7 @@ focus_mode = 0
 selected = 2
 item_count = 4
 popup/item_0/text = "Ease Up In"
+popup/item_0/id = 0
 popup/item_1/text = "Ease Up Out"
 popup/item_1/id = 1
 popup/item_2/text = "Ease Up In/Out"
@@ -1075,6 +1078,7 @@ focus_mode = 0
 selected = 2
 item_count = 4
 popup/item_0/text = "Ease Down In"
+popup/item_0/id = 0
 popup/item_1/text = "Ease Down Out"
 popup/item_1/id = 1
 popup/item_2/text = "Ease Down In/Out"
@@ -1473,6 +1477,7 @@ focus_mode = 0
 selected = 1
 item_count = 2
 popup/item_0/text = "Windowed"
+popup/item_0/id = 0
 popup/item_1/text = "Exclusive Fullscreen"
 popup/item_1/id = 1
 
@@ -1498,6 +1503,7 @@ alignment = 0
 
 [node name="TabBar" type="TabBar" parent="Menu/Colors"]
 layout_mode = 2
+current_tab = 0
 tab_count = 9
 tab_0/title = "Ball"
 tab_1/title = "Path"
@@ -1987,6 +1993,7 @@ layout_mode = 2
 selected = 1
 item_count = 2
 popup/item_0/text = "Top"
+popup/item_0/id = 0
 popup/item_1/text = "Bottom"
 popup/item_1/id = 1
 

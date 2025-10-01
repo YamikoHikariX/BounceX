@@ -14,6 +14,13 @@ func _ready() -> void:
 	%OSSMVolumeSlider.value_changed.connect(update_ossm_volume)
 	%MarkerVolumeSlider.value_changed.connect(update_marker_volume)
 
+	%MusicVolumeSlider.value = 0.1
+
+	%High.button_pressed = false
+	%Low.button_pressed = false
+	%Flat.button_pressed = false
+	%OSSM.button_pressed = false
+
 func toggle_high(enabled: bool) -> void:
 	%MarkerSounds.is_high_enabled = enabled
 

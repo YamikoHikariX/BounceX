@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://bius3v0napj7c" path="res://Textures/Ball.svg" id="1_c82er"]
 [ext_resource type="Texture2D" uid="uid://bkabq6ivbs23x" path="res://Textures/Circle.svg" id="2_8vpo4"]
-[ext_resource type="Script" path="res://Scenes/Marker/marker.gd" id="2_tiud3"]
+[ext_resource type="Script" uid="uid://cxo2ji6selwxo" path="res://Scenes/Marker/marker.gd" id="2_tiud3"]
 [ext_resource type="Texture2D" uid="uid://cbwqw7m1wqj64" path="res://Textures/Dot.svg" id="3_g1kme"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_x4x53"]

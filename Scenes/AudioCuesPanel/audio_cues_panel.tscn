@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://cfp23f60du50n"]
 
-[ext_resource type="Script" path="res://Scenes/AudioCuesPanel/audio_cues_panel.gd" id="1_cciji"]
+[ext_resource type="Script" uid="uid://hb60ew7lyrwn" path="res://Scenes/AudioCuesPanel/audio_cues_panel.gd" id="1_cciji"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ptxwc"]
 
