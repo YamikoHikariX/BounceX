@@ -485,7 +485,7 @@ func _on_depth_value_changed(value):
 		if new_pos > 1 and 1 - marker.depth < confined_movement:
 			confined_movement = 1 - marker.depth
 		elif new_pos < 0 and -marker.depth > confined_movement:
-			confined_movement = -marker.depth
+			confined_movement = - marker.depth
 	for marker in markers:
 		if not owner.marker_data.has(marker.frame):
 			return

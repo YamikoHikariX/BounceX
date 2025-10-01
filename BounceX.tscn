@@ -302,7 +302,6 @@ var dir: DirAccess
 func _ready():
 	$LineEdit.connect('text_changed', text_filter.bind($LineEdit))
 	$Copy/LineEdit.connect('text_changed', text_filter.bind($Copy/LineEdit))
-	get_child(2, true).get_child(3, true).hide()
 	add_button(\"COPY\", true, 'copy')
 	add_button(\"DELETE\", true, 'delete')
 
@@ -1193,7 +1192,7 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Controls" type="VBoxContainer" parent="Menu"]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
 offset_left = 9.0
 offset_top = 71.0
 offset_right = 290.0
@@ -1520,7 +1519,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 
 [node name="Version" type="Label" parent="Menu"]
-layout_mode = 2
+layout_mode = 0
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 9.0
@@ -1812,13 +1811,13 @@ theme_override_constants/separation = 172
 layout_mode = 2
 
 [node name="Label" type="Label" parent="RenderRange/HBox/Start"]
-layout_mode = 2
+layout_mode = 0
 offset_right = 458.0
 offset_bottom = 27.0
 text = "Starting Frame:"
 
 [node name="SpinBox" type="SpinBox" parent="RenderRange/HBox/Start"]
-layout_mode = 2
+layout_mode = 0
 offset_top = 31.0
 offset_right = 150.0
 offset_bottom = 62.0
@@ -1827,13 +1826,13 @@ offset_bottom = 62.0
 layout_mode = 2
 
 [node name="Label" type="Label" parent="RenderRange/HBox/End"]
-layout_mode = 2
+layout_mode = 0
 offset_right = 458.0
 offset_bottom = 27.0
 text = "Ending Frame:"
 
 [node name="SpinBox" type="SpinBox" parent="RenderRange/HBox/End"]
-layout_mode = 2
+layout_mode = 0
 offset_top = 31.0
 offset_right = 150.0
 offset_bottom = 62.0
